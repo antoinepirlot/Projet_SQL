@@ -8,9 +8,6 @@ public class Main {
         System.out.println("Bienvenue dans l'application centrale dédiées aux administrateurs.");
         System.out.println();
 
-        System.out.println("Que voulez vous faire?");
-        System.out.println();
-
         int choix;
         do{
             System.out.println("Que voulez vous faire?");
