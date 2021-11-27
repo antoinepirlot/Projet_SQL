@@ -301,7 +301,6 @@ $$
 DECLARE
     _etudiant RECORD;
     _pae      RECORD;
-    _etudiant RECORD;
 BEGIN
     SELECT id_etudiant, nombre_de_credits_valides
     FROM project_sql.etudiants
