@@ -442,20 +442,20 @@ EXECUTE PROCEDURE project_sql.ajouter_pae();
 CREATE OR REPLACE FUNCTION project_sql.augmenter_nombre_de_credits_pae() RETURNS TRIGGER AS
 $$
 DECLARE
-    _code_pae         INT := NEW.code_pae;
-    _id_ue            INT := NEW.id_ue;
-    _nombre_credit_ue RECORD;
+    _code_pae INT := NEW.code_pae;
+    _id_ue    INT := NEW.id_ue;
+    _ue       RECORD;
 BEGIN
 
     --Mets le nombre de crédit de l'ue dans _nombre_credit_ue
     SELECT nombre_de_credits
     FROM project_sql.ues
     WHERE id_ue = _id_ue
-    INTO _nombre_credit_ue;
+    INTO _ue;
 
     --Augmente le nombre de credit
     UPDATE project_sql.paes
-    SET nombre_de_credits_total = nombre_de_credits_total + _nombre_credit_ue
+    SET nombre_de_credits_total = nombre_de_credits_total + _ue.nombre_de_credits
     WHERE code_pae = _code_pae;
 
     RETURN NEW;
@@ -608,5 +608,16 @@ CREATE TRIGGER trigger_determiner_bloc_etudiant
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.determiner_bloc_etudiant();
 
----------------------------------------------------------------------
+---------------------------------------------------------------------------
+---------------------------CREATE-VIEWS------------------------------------
+---------------------------------------------------------------------------
 
+CREATE OR REPLACE VIEW project_sql.tous_les_etudiants AS
+SELECT e.nom                     AS "Nom",
+       e.prenom                  AS "Prenom",
+       p.nombre_de_credits_total AS "Nombre de credits dans le PAE",
+       e.bloc AS "bloc"
+FROM project_sql.etudiants e,
+     project_sql.paes p
+WHERE e.id_etudiant = p.id_etudiant
+ORDER BY e.nom, e.prenom;
