@@ -20,7 +20,7 @@ CREATE TABLE project_sql.etudiants
     prenom                    VARCHAR(100) NOT NULL CHECK ( prenom <> '' ),
     email                     VARCHAR(150) NOT NULL UNIQUE CHECK ( email <> ''),
     mot_de_passe              CHAR(60)     NOT NULL CHECK ( mot_de_passe <> '' ),
-    bloc                      INT CHECK ( (bloc >= 1 AND bloc <= 3)),
+    bloc                      INT CHECK ( bloc IS NULL OR bloc IN (1, 2, 3)),
     nombre_de_credits_valides INT          NOT NULL DEFAULT 0 CHECK ( nombre_de_credits_valides >= 0 AND nombre_de_credits_valides <= 180)
 );
 
@@ -663,15 +663,23 @@ CREATE TRIGGER trigger_verifier_pae_reinitialisation
     EXECUTE PROCEDURE project_sql.verifier_pae_reinitialisation();
 
 ---------------------------------------------------------------------------
----------------------------CREATE-VIEWS------------------------------------
+-------------------------------VIEWS---------------------------------------
 ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION project_sql.visualiser_tous_les_etudiants_bloc(_bloc INT) RETURNS RECORD AS
+$$
+DECLARE
+    view RECORD;
+BEGIN
+    SELECT e.nom                     AS "Nom",
+           e.prenom                  AS "Prenom",
+           p.nombre_de_credits_total AS "Nombre de credits dans le PAE"
+    FROM project_sql.etudiants e,
+         project_sql.paes p
+    WHERE e.id_etudiant = p.id_etudiant
+      AND e.bloc = _bloc
+    ORDER BY e.nom, e.prenom
+    INTO view;
 
-CREATE OR REPLACE VIEW project_sql.tous_les_etudiants AS
-SELECT e.nom                     AS "Nom",
-       e.prenom                  AS "Prenom",
-       p.nombre_de_credits_total AS "Nombre de credits dans le PAE",
-       e.bloc                    AS "bloc"
-FROM project_sql.etudiants e,
-     project_sql.paes p
-WHERE e.id_etudiant = p.id_etudiant
-ORDER BY e.nom, e.prenom;
+    RETURN view;
+END;
+$$ LANGUAGE plpgsql;
