@@ -296,10 +296,13 @@ BEGIN
     GROUP BY id_etudiant
     INTO _etudiant;
 
+    --TODO à mettre dans un TRIGGER
     IF _etudiant.count = 0 THEN
         RAISE 'L''émail ou le mot de passe est incorrect';
     END IF;
 
+    --TODO CREATE USER etc
+    RETURN _etudiant.id_etudiant;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -680,8 +683,3 @@ BEGIN
     RETURN view;
 END;
 $$ LANGUAGE plpgsql;
-
-DROP USER test;
-CREATE USER test PASSWORD 'test';
-
-DROP USER test;
