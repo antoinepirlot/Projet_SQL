@@ -10,7 +10,6 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Bienvenue dans l'application centrale dédiées aux administrateurs.");
         System.out.println();
-
         String pseudo, mdp;
         System.out.println("Quel est ton pseudo?");
         pseudo = scanner.next();
@@ -36,7 +35,7 @@ public class Main {
             choix = scanner.nextInt();
             switch (choix) {
                 case 1:
-                    ajouterUe(connection);
+                    ajouterUe();
                     break;
                 case 2:
                     ajouterPrerequis();
@@ -67,15 +66,8 @@ public class Main {
         } while (1 <= choix && choix <= 8);
     }
 
-    public static void ajouterUe(Connection connection, String mdp){
-        try{
-            Statement s = connection.createStatement();
-            s.execute("SELECT project_sql.ajouter_etudiant('Pirlot', 'Antoine', 'antoine.pirlot@student.vinci.be'," + mdp + ")");
-        } catch (SQLException e){
-            System.out.println("Erreur lors de l'appel de la fonction!");
-            e.printStackTrace();
-            System.exit(1);
-        }
+    public static void ajouterUe(){
+        //TODO
     }
 
     public static void ajouterPrerequis(){
