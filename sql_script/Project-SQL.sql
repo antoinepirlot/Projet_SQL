@@ -98,24 +98,17 @@ DECLARE
     _ue            RECORD;
     _ue_prerequise RECORD;
 BEGIN
-    SELECT id_ue, bloc
+    SELECT id_ue
     FROM project_sql.ues
     WHERE code_ue = _code_ue
     INTO _ue;
 
-    SELECT id_ue, bloc
+    SELECT id_ue
     FROM project_sql.ues
     WHERE code_ue = _code_ue_prerequise
     INTO _ue_prerequise;
 
-    IF _ue_prerequise.bloc > _ue.bloc THEN
-        RAISE 'Le bloc du prérequis est supérieur au bloc de cette ue.';
-    END IF;
-
-    IF _ue_prerequise.bloc = _ue.bloc THEN
-        RAISE 'Le bloc du prérequis est égal au bloc de cette ue.';
-    END IF;
-
+    -- Vérification si l'ajout peut se faire grâce au trigger_verifier_ajout_prerequis_ue
     INSERT INTO project_sql.prerequis
     VALUES (_ue.id_ue, _ue_prerequise.id_ue);
 END;
@@ -145,35 +138,20 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION project_sql.encoder_ue_validee(_email VARCHAR(150), _code_ue VARCHAR(15)) RETURNS VOID AS
 $$
 DECLARE
-    _ue            RECORD;
-    _ue_prerequise RECORD;
-    _etudiant      RECORD;
+    _ue       RECORD;
+    _etudiant RECORD;
 BEGIN
     SELECT id_ue
     FROM project_sql.ues
     WHERE code_ue = _code_ue
     INTO _ue;
 
-    SELECT id_ue_prerequise, COUNT(*) AS "count"
-    FROM project_sql.prerequis
-    WHERE id_ue = _ue.id_ue
-    GROUP BY id_ue_prerequise
-    INTO _ue_prerequise;
-
     SELECT id_etudiant
     FROM project_sql.etudiants
     WHERE email = _email
     INTO _etudiant;
 
-    -- Si il y a une ue prérequise et qu'elle n'est pas validée, alors on ne peut pas valider cette ue.
-    IF _ue_prerequise.count <> 0
-        AND (SELECT COUNT(*)
-             FROM project_sql.ues_validees
-             WHERE id_ue = _ue_prerequise.id_ue_prerequise
-               AND id_etudiant = _etudiant.id_etudiant) = 0 THEN
-
-        RAISE 'L''étudiant n''a pas validé le prérequis de ce cours.';
-    END IF;
+    -- Les vérifications se font grâce au trigger_augmenter_credits_valides
 
     -- Pas besoin de vérifier si l'ue est déjà validée car il y a la contrainte d'unicité qui vérifie cela
     -- La contrainte référentiel aussi vérifie que l'ue est déjà présente dans la DB
@@ -194,63 +172,24 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION project_sql.ajouter_ue_pae(_email VARCHAR(150), _code_ue VARCHAR(15)) RETURNS VOID AS
 $$
 DECLARE
-    _etudiant      RECORD;
-    _pae           RECORD;
-    _ue            RECORD;
-    _ue_prerequise RECORD;
+    _pae RECORD;
+    _ue  RECORD;
 BEGIN
-    SELECT id_etudiant
-    FROM project_sql.etudiants
-    WHERE email = _email
-    INTO _etudiant;
 
-    SELECT valide, nombre_de_credits_total
-    FROM project_sql.paes
-    WHERE id_etudiant = _etudiant.id_etudiant
+    SELECT p.code_pae
+    FROM project_sql.paes p,
+         project_sql.etudiants e
+    WHERE e.id_etudiant = p.id_etudiant
+      AND e.email = _email
     INTO _pae;
 
-    SELECT id_ue, bloc
+    SELECT id_ue
     FROM project_sql.ues
     WHERE code_ue = _code_ue
     INTO _ue;
 
-    -- Si le PAE est déjà validé
-    IF _pae.valide IS TRUE THEN
-        RAISE 'Ce PAE a déjà été validé, il est impossible d''ajouter une ue.';
-    END IF;
-
-    -- Si l’étudiant a déjà validé cette UE précédemment
-    IF (SELECT COUNT(*)
-        FROM project_sql.ues_validees
-        WHERE id_ue = _ue.id_ue
-          AND id_etudiant = _etudiant.id_etudiant) <> 0 THEN
-
-        RAISE 'Cette ue a déjà été validée par l''étudiant';
-    END IF;
-
-    -- Si l’étudiant a validé moins de 30 ects et que l’UE n’est pas du bloc 1
-    IF (SELECT nombre_de_credits_valides
-        FROM project_sql.etudiants
-        WHERE id_etudiant = _etudiant.id_etudiant) < 30 AND _ue.bloc != 1 THEN
-
-        RAISE 'L''étudiant a validé moins de 30 crédits et cette ue ne figure pas au bloc 1.';
-    END IF;
-
-    -- Si l’étudiant n’a pas validé tous les prérequis de cette UE
-    -- Avec les vérifications de la fonction encoder_ue_validee, il est impossible que le prérequis ai été validé sans
-    -- sans son prérequis.
-    FOR _ue_prerequise IN (SELECT id_ue_prerequise
-                           FROM project_sql.prerequis
-                           WHERE id_ue = _ue.id_ue)
-        LOOP
-            IF (SELECT COUNT(*)
-                FROM project_sql.ues_validees
-                WHERE id_ue = _ue_prerequise.id_ue_prerequise
-                  AND id_etudiant = _etudiant.id_etudiant) = 0 THEN
-                RAISE 'L''étudiant n''a pas validé une ue prérequise.';
-            END IF;
-        END LOOP;
-
+    INSERT INTO project_sql.ues_pae
+    VALUES (_pae.code_pae, _ue.id_ue);
     --L'augmentation du nombre de crédits total du pae se fait grâce au trigger_augmenter_nombre_de_credits_pae
 END;
 $$ LANGUAGE plpgsql;
@@ -263,20 +202,15 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION project_sql.enlever_ue_pae(_email VARCHAR(150), _code_ue VARCHAR(15)) RETURNS VOID AS
 $$
 DECLARE
-    _ue       RECORD;
-    _etudiant RECORD;
+    _ue  RECORD;
+    _pae RECORD;
 BEGIN
-    SELECT id_etudiant
-    FROM project_sql.etudiants
-    WHERE email = _email
-    INTO _etudiant;
-
-    IF (SELECT valide
-        FROM project_sql.paes
-        WHERE id_etudiant = _etudiant.id_etudiant) IS TRUE THEN
-
-        RAISE 'Impossible de supprimer une ue d''un pae déjà validé';
-    END IF;
+    SELECT code_pae
+    FROM project_sql.etudiants e,
+         project_sql.paes p
+    WHERE e.id_etudiant = p.id_etudiant
+      AND e.email = _email
+    INTO _pae;
 
     SELECT id_ue
     FROM project_sql.ues
@@ -285,7 +219,8 @@ BEGIN
 
     DELETE
     FROM project_sql.ues_pae
-    WHERE id_ue = _ue.id_ue;
+    WHERE code_pae = _pae.code_pae
+      AND id_ue = _ue.id_ue;
 
     -- La diminution du nombre de crédits total du pae se fait grâce au trigger_diminuer_nombre_de_credits_pae
 END;
@@ -299,42 +234,15 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION project_sql.valider_pae(_email VARCHAR(150)) RETURNS VOID AS
 $$
 DECLARE
-    _etudiant RECORD;
-    _pae      RECORD;
+    _pae RECORD;
 BEGIN
-    SELECT id_etudiant, nombre_de_credits_valides
-    FROM project_sql.etudiants
-    WHERE email = _email
-    INTO _etudiant;
 
-    SELECT code_pae, nombre_de_credits_total
-    FROM project_sql.paes
-    WHERE id_etudiant = _etudiant.id_etudiant
+    SELECT code_pae
+    FROM project_sql.etudiants e,
+         project_sql.paes p
+    WHERE e.id_etudiant = p.id_etudiant
+      AND e.email = _email
     INTO _pae;
-
-    -- Verifie que le pae n'est pas déjà validé
-    IF (SELECT valide
-        FROM project_sql.paes
-        WHERE code_pae = _pae.code_pae) IS TRUE THEN
-        RAISE 'PAE déjà validé';
-    END IF;
-
-    -- Si la somme des crédits précédemment validés et ceux du PAE atteignent 180, le PAE
-    -- ne peut pas dépasser 74 crédits
-    IF (_etudiant.nombre_de_credits_valides + _pae.nombre_de_credits_total = 180 AND _pae > 74) THEN
-        RAISE 'Impossible de valider le pae, il doit y avoir au maximum 74 crédits.';
-    END IF;
-
-    -- Si l’étudiant n’a pas validé au moins 45 crédits dans le passé, alors son PAE ne pourra
-    -- pas dépasser 60 crédits
-    IF (_etudiant.nombre_de_credits_valides < 45 AND _pae.nombre_de_credits_total > 60) THEN
-        RAISE 'Impossible de valider le pae, il doit y avoir maximum 60 crédits car tu as validé moins de 46 crédits';
-    END IF;
-
-    -- Sinon, le nombre de crédit du PAE devra être entre 55 et 74 crédits
-    IF (_pae.nombre_de_credits_total < 55 OR _pae.nombre_de_credits_total > 74) THEN
-        RAISE 'Impossible de valider le pae, tu dois avoir entre 55 et 74 crédits dans ton pae.';
-    END IF;
 
     UPDATE project_sql.paes
     SET valide = TRUE
@@ -353,26 +261,16 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION project_sql.reinitialiser_pae(_email VARCHAR(150)) RETURNS VOID AS
 $$
 DECLARE
-    _etudiant RECORD;
     _pae      RECORD;
 BEGIN
-    SELECT id_etudiant
-    FROM project_sql.etudiants
-    WHERE email = _email
-    INTO _etudiant;
-
-    IF (SELECT valide
-        FROM project_sql.paes
-        WHERE id_etudiant = _etudiant.id_etudiant) IS TRUE THEN
-
-        RAISE 'Le pae ne peut pas être réinitialisé car il est déjà validé.';
-    END IF;
-
-    -- Mets le code_pae du pae de l'étudiant dans _pae
-    SELECT code_pae
-    FROM project_sql.paes
-    WHERE id_etudiant = _etudiant.id_etudiant
+    SELECT p.code_pae
+    FROM project_sql.etudiants e,
+         project_sql.paes p
+    WHERE e.id_etudiant = p.id_etudiant
+      AND e.email = _email
     INTO _pae;
+
+    -- Les vérifications se font grâce au trigger_verifier_pae_reinitialisation
 
     -- Supprime toutes les ues du pae de l'étudiant
     DELETE
@@ -398,6 +296,7 @@ BEGIN
     GROUP BY id_etudiant
     INTO _etudiant;
 
+    --TODO à mettre dans un TRIGGER
     IF _etudiant.count = 0 THEN
         RAISE 'L''émail ou le mot de passe est incorrect';
     END IF;
@@ -436,27 +335,107 @@ CREATE TRIGGER trigger_ajouter_pae
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.ajouter_pae();
 
+---------------------------------------------------------------------
+
+/**
+  Vérifie que l'ue prerequise peut être ajoutée.
+ */
+CREATE OR REPLACE FUNCTION project_sql.verifier_ajout_prerequis_ue() RETURNS TRIGGER AS
+$$
+DECLARE
+    _ue            RECORD;
+    _ue_prerequise RECORD;
+BEGIN
+    SELECT bloc
+    FROM project_sql.ues
+    WHERE ues.id_ue = NEW.id_ue
+    INTO _ue;
+
+    SELECT bloc
+    FROM project_sql.ues
+    WHERE id_ue = NEW.id_ue_prerequise
+    INTO _ue_prerequise;
+
+    IF _ue_prerequise.bloc > _ue.bloc THEN
+        RAISE 'Le bloc du prérequis est supérieur au bloc de cette ue.';
+    END IF;
+
+    IF _ue_prerequise.bloc = _ue.bloc THEN
+        RAISE 'Le bloc du prérequis est égal au bloc de cette ue.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_verifier_ajout_prerequis_ue
+    BEFORE INSERT
+    ON project_sql.prerequis
+    FOR EACH ROW
+EXECUTE PROCEDURE project_sql.verifier_ajout_prerequis_ue();
+
+---------------------------------------------------------------------
+
 /**
   Augmente le nombre de crédits total d'un pae après q'une ue à été ajouté à celui-ci.
  */
 CREATE OR REPLACE FUNCTION project_sql.augmenter_nombre_de_credits_pae() RETURNS TRIGGER AS
 $$
 DECLARE
-    _code_pae INT := NEW.code_pae;
-    _id_ue    INT := NEW.id_ue;
-    _ue       RECORD;
+    _etudiant_et_pae RECORD;
+    _ue              RECORD;
+    _ue_prerequise   RECORD;
 BEGIN
+    SELECT p.id_etudiant, p.valide, e.nombre_de_credits_valides
+    FROM project_sql.paes p,
+         project_sql.etudiants e
+    WHERE p.id_etudiant = e.id_etudiant
+      AND p.code_pae = NEW.code_pae
+    INTO _etudiant_et_pae;
 
-    --Mets le nombre de crédit de l'ue dans _nombre_credit_ue
-    SELECT nombre_de_credits
+    SELECT id_ue, bloc, nombre_de_credits
     FROM project_sql.ues
-    WHERE id_ue = _id_ue
+    WHERE ues.id_ue = NEW.id_ue
     INTO _ue;
+
+    -- Si le PAE est déjà validé
+    IF _etudiant_et_pae.valide IS TRUE THEN
+        RAISE 'Ce PAE a déjà été validé, il est impossible d''ajouter une ue.';
+    END IF;
+
+    -- Si l’étudiant a déjà validé cette UE précédemment
+    IF (SELECT COUNT(*)
+        FROM project_sql.ues_validees
+        WHERE id_ue = _ue.id_ue
+          AND id_etudiant = _etudiant_et_pae.id_etudiant) <> 0 THEN
+
+        RAISE 'Cette ue a déjà été validée par l''étudiant';
+    END IF;
+
+    -- Si l’étudiant a validé moins de 30 ects et que l’UE n’est pas du bloc 1
+    IF _etudiant_et_pae.nombre_de_credits_valides < 30 AND _ue.bloc != 1 THEN
+        RAISE 'L''étudiant a validé moins de 30 crédits et cette ue ne figure pas au bloc 1.';
+    END IF;
+
+    -- Si l’étudiant n’a pas validé tous les prérequis de cette UE
+    -- Avec les vérifications de la fonction encoder_ue_validee, il est impossible que le prérequis ai été validé sans
+    -- sans son prérequis.
+    FOR _ue_prerequise IN (SELECT id_ue_prerequise
+                           FROM project_sql.prerequis
+                           WHERE id_ue = _ue.id_ue)
+        LOOP
+            IF (SELECT COUNT(*)
+                FROM project_sql.ues_validees
+                WHERE id_ue = _ue_prerequise.id_ue_prerequise
+                  AND id_etudiant = _etudiant_et_pae.id_etudiant) = 0 THEN
+                RAISE 'L''étudiant n''a pas validé une ue prérequise.';
+            END IF;
+        END LOOP;
 
     --Augmente le nombre de credit
     UPDATE project_sql.paes
     SET nombre_de_credits_total = nombre_de_credits_total + _ue.nombre_de_credits
-    WHERE code_pae = _code_pae;
+    WHERE code_pae = NEW.code_pae;
 
     RETURN NEW;
 END;
@@ -472,18 +451,29 @@ EXECUTE PROCEDURE project_sql.augmenter_nombre_de_credits_pae();
 CREATE OR REPLACE FUNCTION project_sql.diminuer_nombre_de_credits_pae() RETURNS TRIGGER AS
 $$
 DECLARE
-    _id_ue             INT := NEW.id_ue;
-    _code_pae          INT := NEW.code_pae;
-    _nombre_de_credits INT;
+    _ue  RECORD;
+    _pae RECORD;
 BEGIN
+    SELECT p.code_pae, p.id_etudiant, p.valide
+    FROM project_sql.paes p,
+         project_sql.etudiants e
+    WHERE p.id_etudiant = e.id_etudiant
+      AND p.code_pae = NEW.code_pae
+    INTO _pae;
+
+    IF _pae.valide IS TRUE THEN
+        RAISE 'Impossible de supprimer une ue d''un pae déjà validé';
+    END IF;
+
     SELECT nombre_de_credits
     FROM project_sql.ues
-    WHERE id_ue = _id_ue;
+    WHERE id_ue = NEW.id_ue
+    INTO _ue;
 
     --Diminue le nombre de crédits dans le pae
     UPDATE project_sql.paes
-    SET nombre_de_credits_total = nombre_de_credits_total - _nombre_de_credits
-    WHERE code_pae = _code_pae;
+    SET nombre_de_credits_total = nombre_de_credits_total - _ue.nombre_de_credits
+    WHERE code_pae = _pae.code_pae;
 
     RETURN NEW;
 END;
@@ -504,17 +494,17 @@ EXECUTE PROCEDURE project_sql.diminuer_nombre_de_credits_pae();
 CREATE OR REPLACE FUNCTION project_sql.augmenter_nombre_etudiants_inscrits() RETURNS TRIGGER AS
 $$
 DECLARE
-    _code_pae INT := NEW.code_pae;
-    _id_ue    RECORD;
+    _ue    RECORD;
 BEGIN
-    FOR _id_ue IN (SELECT id_ue
+    FOR _ue IN (SELECT id_ue
                    FROM project_sql.ues_pae
-                   WHERE code_pae = _code_pae)
+                   WHERE code_pae = NEW.code_pae)
         LOOP
             UPDATE project_sql.ues
             SET nombre_d_inscrits = nombre_d_inscrits + 1
-            WHERE id_ue = _id_ue;
+            WHERE id_ue = _ue.id_ue;
         END LOOP;
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -535,12 +525,32 @@ EXECUTE PROCEDURE project_sql.augmenter_nombre_etudiants_inscrits();
 CREATE OR REPLACE FUNCTION project_sql.augmenter_credits_valides() RETURNS TRIGGER AS
 $$
 DECLARE
-    _id_etudiant INT := NEW.id_etudiant;
-    _credits_ue  RECORD;
+    _ue RECORD;
 BEGIN
+    SELECT p.id_ue,
+           p.id_ue_prerequise,
+           u.nombre_de_credits,
+           COUNT(p.*) AS "nombre_prerequis"
+    FROM project_sql.prerequis p,
+         project_sql.ues u
+    WHERE u.id_ue = p.id_ue
+      AND u.id_ue = NEW.id_ue
+    GROUP BY id_ue_prerequise
+    INTO _ue;
+
+    -- Si il y a une ue prérequise et qu'elle n'est pas validée, alors on ne peut pas valider cette ue.
+    IF _ue.nombre_prerequis <> 0
+        AND (SELECT COUNT(*)
+             FROM project_sql.ues_validees
+             WHERE id_ue = _ue.id_ue_prerequise
+               AND id_etudiant = NEW.id_etudiant) = 0 THEN
+
+        RAISE 'L''étudiant n''a pas validé le prérequis de ce cours.';
+    END IF;
+
     UPDATE project_sql.etudiants
-    SET nombre_de_credits_valides = nombre_de_credits_valides + _credits_ue.nombre_de_credits
-    WHERE id_etudiant = _id_etudiant;
+    SET nombre_de_credits_valides = nombre_de_credits_valides + _ue.nombre_de_credits
+    WHERE id_etudiant = NEW.id_etudiant;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -558,41 +568,56 @@ EXECUTE PROCEDURE project_sql.augmenter_credits_valides();
 CREATE OR REPLACE FUNCTION project_sql.determiner_bloc_etudiant() RETURNS TRIGGER AS
 $$
 DECLARE
-    _id_etudiant                        INT := NEW.id_etudiant;
-    _nombre_de_credits_valides_etudiant RECORD ;
-    _nombre_de_credits_pae              RECORD ;
-
+    _etudiant_et_pae RECORD ;
 BEGIN
-
     --SELECT des données que l'on stockes dans des variables
-    SELECT nombre_de_credits_total
-    FROM project_sql.paes
-    WHERE id_etudiant = _id_etudiant
-    INTO _nombre_de_credits_pae;
+    SELECT e.id_etudiant, p.code_pae, p.nombre_de_credits_total, p.valide, e.nombre_de_credits_valides
+    FROM project_sql.etudiants e,
+         project_sql.paes p
+    WHERE e.id_etudiant = p.id_etudiant
+      AND e.id_etudiant = NEW.id_etudiant
+    INTO _etudiant_et_pae;
 
-    SELECT nombre_de_credits_valides
-    FROM project_sql.etudiants
-    WHERE id_etudiant = _id_etudiant
-    INTO _nombre_de_credits_valides_etudiant;
+    -- Verifie que le pae n'est pas déjà validé
+    IF _etudiant_et_pae.valide IS TRUE THEN
+        RAISE 'PAE déjà validé';
+    END IF;
 
-    --Début des vérifications
+    -- Si la somme des crédits précédemment validés et ceux du PAE atteignent 180, le PAE
+    -- ne peut pas dépasser 74 crédits
+    IF (_etudiant_et_pae.nombre_de_credits_valides + _etudiant_et_pae.nombre_de_credits_total = 180 AND
+        _etudiant_et_pae > 74) THEN
+        RAISE 'Impossible de valider le pae, il doit y avoir au maximum 74 crédits.';
+    END IF;
+
+    -- Si l’étudiant n’a pas validé au moins 45 crédits dans le passé, alors son PAE ne pourra
+    -- pas dépasser 60 crédits
+    IF (_etudiant_et_pae.nombre_de_credits_valides < 45 AND _etudiant_et_pae.nombre_de_credits_total > 60) THEN
+        RAISE 'Impossible de valider le pae, il doit y avoir maximum 60 crédits car tu as validé moins de 46 crédits';
+    END IF;
+
+    -- Sinon, le nombre de crédit du PAE devra être entre 55 et 74 crédits
+    IF (_etudiant_et_pae.nombre_de_credits_total < 55 OR _etudiant_et_pae.nombre_de_credits_total > 74) THEN
+        RAISE 'Impossible de valider le pae, tu dois avoir entre 55 et 74 crédits dans ton pae.';
+    END IF;
+
     --Mets un etudiant au bloc 3 si la somme de ses crédits en cours et ceux validé sont de 180 ou plus
-    IF _nombre_de_credits_valides_etudiant + _nombre_de_credits_pae >= 180 THEN
+    IF _etudiant_et_pae + _etudiant_et_pae >= 180 THEN
         UPDATE project_sql.etudiants
         SET bloc = 3
-        WHERE id_etudiant = _id_etudiant;
+        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
 
         --Mets l'étudiant en bloc 1 si ses crédits validés sont strictement inférieur à 45
-    ELSIF _nombre_de_credits_valides_etudiant < 45 THEN
+    ELSIF _etudiant_et_pae < 45 THEN
         UPDATE project_sql.etudiants
         SET bloc = 1
-        WHERE id_etudiant = _id_etudiant;
+        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
 
         --Mets l'étudiant en bloc 2 si les 2 conditions ci-dessus n'ont pas été true
     ELSE
         UPDATE project_sql.etudiants
         SET bloc = 2
-        WHERE id_etudiant = _id_etudiant;
+        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
     END IF;
 
     RETURN NEW;
@@ -608,6 +633,35 @@ CREATE TRIGGER trigger_determiner_bloc_etudiant
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.determiner_bloc_etudiant();
 
+---------------------------------------------------------------------
+
+/**
+  Vérifie que le pae peut être réinitialisé
+ */
+CREATE OR REPLACE FUNCTION project_sql.verifier_pae_reinitialisation() RETURNS TRIGGER AS
+$$
+DECLARE
+    _pae RECORD;
+BEGIN
+    SELECT valide
+    FROM project_sql.paes
+    WHERE code_pae = NEW.code_pae
+    INTO _pae;
+
+    IF _pae.valide IS TRUE THEN
+        RAISE 'Le pae ne peut pas être réinitialisé car il est déjà validé.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_verifier_pae_reinitialisation
+    BEFORE DELETE
+    ON project_sql.ues_pae
+    FOR EACH ROW
+    EXECUTE PROCEDURE project_sql.verifier_pae_reinitialisation();
+
 ---------------------------------------------------------------------------
 ---------------------------CREATE-VIEWS------------------------------------
 ---------------------------------------------------------------------------
@@ -616,7 +670,7 @@ CREATE OR REPLACE VIEW project_sql.tous_les_etudiants AS
 SELECT e.nom                     AS "Nom",
        e.prenom                  AS "Prenom",
        p.nombre_de_credits_total AS "Nombre de credits dans le PAE",
-       e.bloc AS "bloc"
+       e.bloc                    AS "bloc"
 FROM project_sql.etudiants e,
      project_sql.paes p
 WHERE e.id_etudiant = p.id_etudiant
