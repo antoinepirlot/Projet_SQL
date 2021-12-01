@@ -668,7 +668,10 @@ EXECUTE PROCEDURE project_sql.verifier_pae_reinitialisation();
 ---------------------------------------------------------------------------
 -------------------------------VIEWS---------------------------------------
 ---------------------------------------------------------------------------
-CREATE VIEW project_sql.visualiser_tous_les_etudiants_bloc AS
+/**
+  Visualise les étudiants avec le bloc
+ */
+CREATE OR REPLACE VIEW project_sql.visualiser_tous_les_etudiants_bloc AS
     SELECT nom,
            prenom,
            nombre_de_credits_valides,
