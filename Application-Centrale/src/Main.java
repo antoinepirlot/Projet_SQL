@@ -6,17 +6,16 @@ import java.util.Scanner;
 public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
+    private static final Connection connexion = connexionDb();
 
     public static void main(String[] args) {
-        System.out.println("Bienvenue dans l'application centrale dédiées aux administrateurs.");
+        System.out.println("Bienvenue dans l'application centrale dï¿½diï¿½es aux administrateurs.");
         System.out.println();
-        String pseudo, mdp;
-        System.out.println("Quel est ton pseudo?");
-        pseudo = scanner.next();
+
+        /*String pseudo, mdp;
         System.out.println("Quel est ton mot de passe?");
         String sel = BCrypt.gensalt();
-        mdp = BCrypt.hashpw(scanner.next(), sel);
-        Connection connection = connexionDb(pseudo, mdp);
+        mdp = BCrypt.hashpw(scanner.next(), sel);*/
 
         int choix;
         do{
@@ -24,12 +23,12 @@ public class Main {
             System.out.println();
 
             System.out.println("1 -> Ajouter une ue");
-            System.out.println("2 -> Ajouter un prerequis à une ue existante");
-            System.out.println("3 -> Ajouter un étudiant");
-            System.out.println("4 -> Encoder une ue validée pour un étudiant");
-            System.out.println("5 -> Visualiser tous les étudiants d'un bloc particulier");
-            System.out.println("6 -> Visualiser tous les étudiants");
-            System.out.println("7 -> Visualiser tous les étudiants qui n'ont pas encore validé leur PAE");
+            System.out.println("2 -> Ajouter un prerequis ï¿½ une ue existante");
+            System.out.println("3 -> Ajouter un ï¿½tudiant");
+            System.out.println("4 -> Encoder une ue validï¿½e pour un ï¿½tudiant");
+            System.out.println("5 -> Visualiser tous les ï¿½tudiants d'un bloc particulier");
+            System.out.println("6 -> Visualiser tous les ï¿½tudiants");
+            System.out.println("7 -> Visualiser tous les ï¿½tudiants qui n'ont pas encore validï¿½ leur PAE");
             System.out.println("8 -> Visualiser les UEs d'un bloc en particulier");
 
             choix = scanner.nextInt();
@@ -59,7 +58,7 @@ public class Main {
                     visualiserUEDUnBloc();
                     break;
                 default:
-                    System.out.println("Fin du programme. Bonne journée.");
+                    System.out.println("Fin du programme. Bonne journï¿½e.");
                     System.out.println();
                     break;
             }
@@ -67,7 +66,27 @@ public class Main {
     }
 
     public static void ajouterUe(){
-        //TODO
+        System.out.println("Quel est le code de l'ue?");
+        String codeUe = scanner.next();
+
+        System.out.println("Quel est le nom de l'ue?");
+        String nomUe = scanner.next();
+
+        System.out.println("Quel est le bloc de l'ue?");
+        int bloc = scanner.nextInt();
+
+        System.out.println("Quel est le nombre de crï¿½dits pour cette ue?");
+        int nombreDeCredits = scanner.nextInt();
+
+        try{
+            PreparedStatement s = (PreparedStatement) connexion.createStatement();
+            s.executeUpdate("SELECT project_sql.ajouter_ue("+codeUe+", "+nomUe+", "+bloc+", "+nombreDeCredits+");");
+
+        } catch (SQLException e){
+            System.out.println("Erreur lors de l'insertion!");
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     public static void ajouterPrerequis(){
@@ -83,11 +102,38 @@ public class Main {
     }
 
     public static void visualiserTousLesEtudiantDUnBloc(){
-        //TODO
+        int bloc = -1;
+        while (bloc < 0 || bloc > 3) {
+            System.out.println("De quel bloc voulez vous voir les Ã©tudiant?");
+            System.out.println("1 -> Bloc 1");
+            System.out.println("2 -> Bloc 2");
+            System.out.println("3 -> Bloc 3");
+            bloc = scanner.nextInt();
+        }
+        String query;
+        try {
+            if(bloc == 0)
+                query = """
+                        SELECT nom, prenom, nombre_de_credits_valides FROM project_sql.etudiants WHERE "bloc" IS NULL
+                        """;
+            else
+                query = "SELECT nom, prenom, nombre_de_credits_valides FROM project_sql.etudiants WHERE \"bloc\" ="+bloc+"";
+            Statement statement = connexion.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()){
+                String nom = resultSet.getString(1);
+                String prenom = resultSet.getString(2);
+                String nombreDeCredits = resultSet.getString(3);
+                System.out.println(nom + ", " + prenom + ", " + nombreDeCredits);
+            }
+        } catch (SQLException e) {
+            System.out.println("ProblÃ¨me lors de la demande Ã  la base de donnÃ©es");
+            e.printStackTrace();
+        }
     }
 
     public static void visualiserTout(){
-        //TODO à voir si le nom doit changer ou pas (de la fonction)
+        //TODO ï¿½ voir si le nom doit changer ou pas (de la fonction)
     }
 
     public static void visualiserEtudiantPAENonValide(){
@@ -98,7 +144,7 @@ public class Main {
         //TODO
     }
 
-    private static Connection connexionDb(String pseudo, String mdp){
+    private static Connection connexionDb(){
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e){
@@ -109,7 +155,7 @@ public class Main {
         String url = "jdbc:postgresql://127.0.0.1:5432/postgres";
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(url, pseudo, mdp);
+            connection = DriverManager.getConnection(url, "postgres", "06192000");
         } catch (SQLException e){
             System.out.println("Impossible de joindre le server !");
             System.exit(1);
