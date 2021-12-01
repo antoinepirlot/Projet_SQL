@@ -1,3 +1,6 @@
+import com.berry.BCrypt;
+
+import java.sql.*;
 import java.util.Scanner;
 
 public class Main {
@@ -7,6 +10,13 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Bienvenue dans l'application centrale dédiées aux administrateurs.");
         System.out.println();
+        String pseudo, mdp;
+        System.out.println("Quel est ton pseudo?");
+        pseudo = scanner.next();
+        System.out.println("Quel est ton mot de passe?");
+        String sel = BCrypt.gensalt();
+        mdp = BCrypt.hashpw(scanner.next(), sel);
+        Connection connection = connexionDb(pseudo, mdp);
 
         int choix;
         do{
@@ -86,5 +96,24 @@ public class Main {
 
     public static void visualiserUEDUnBloc(){
         //TODO
+    }
+
+    private static Connection connexionDb(String pseudo, String mdp){
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e){
+            System.out.println("Driver PostgeSQL manquant!");
+            System.exit(1);
+        }
+
+        String url = "jdbc:postgresql://127.0.0.1:5432/postgres";
+        Connection connection = null;
+        try {
+            connection = DriverManager.getConnection(url, pseudo, mdp);
+        } catch (SQLException e){
+            System.out.println("Impossible de joindre le server !");
+            System.exit(1);
+        }
+        return connection;
     }
 }
