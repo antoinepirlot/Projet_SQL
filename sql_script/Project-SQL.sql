@@ -668,25 +668,12 @@ EXECUTE PROCEDURE project_sql.verifier_pae_reinitialisation();
 ---------------------------------------------------------------------------
 -------------------------------VIEWS---------------------------------------
 ---------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION project_sql.visualiser_tous_les_etudiants_bloc(_bloc INT) RETURNS RECORD AS
-$$
-DECLARE
-    view RECORD;
-BEGIN
-    SELECT e.nom                     AS "Nom",
-           e.prenom                  AS "Prenom",
-           p.nombre_de_credits_total AS "Nombre de credits dans le PAE"
-    FROM project_sql.etudiants e,
-         project_sql.paes p
-    WHERE e.id_etudiant = p.id_etudiant
-      AND e.bloc = _bloc
-    ORDER BY e.nom, e.prenom
-    INTO view;
-
-    RETURN view;
-END;
-$$ LANGUAGE plpgsql;
-
+CREATE VIEW project_sql.visualiser_tous_les_etudiants_bloc AS
+    SELECT nom,
+           prenom,
+           nombre_de_credits_valides,
+           bloc AS "bloc"
+    FROM project_sql.etudiants;
 
 CREATE OR REPLACE VIEW project_sql.visualiser_pae as
 SELECT ue.code_ue, ue.nom, ue.nombre_de_credits, ue.bloc , e.email as "email"
