@@ -169,7 +169,7 @@ public class Main {
                 String nom = resultSet.getString(1);
                 String prenom = resultSet.getString(2);
                 String nombreDeCredits = resultSet.getString(3);
-                System.out.println(nom + ", " + prenom + ", " + nombreDeCredits);
+                System.out.println("Nom: " + nom + ", prénom: " + prenom + ", nombre de crédits validés: " + nombreDeCredits);
             }
         } catch (SQLException e) {
             System.out.println("Problème lors de la demande à la base de données");
