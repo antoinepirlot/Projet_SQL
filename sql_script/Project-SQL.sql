@@ -27,9 +27,9 @@ CREATE TABLE project_sql.etudiants
 CREATE TABLE project_sql.ues
 (
     id_ue             SERIAL PRIMARY KEY,
-    code_ue           VARCHAR(15) NOT NULL UNIQUE,
+    code_ue           VARCHAR(15) NOT NULL UNIQUE CHECK ( upper(code_ue) LIKE 'BINV1%' OR upper(code_ue) LIKE 'BINV2%' OR upper(code_ue) LIKE 'BINV3%'),
     nom               VARCHAR(50) NOT NULL,
-    bloc              INT         NOT NULL CHECK (bloc = 1 OR bloc = 2 OR bloc = 3),
+    bloc              INT         NOT NULL,
     nombre_de_credits INT         NOT NULL CHECK ( nombre_de_credits > 0 ),
     nombre_d_inscrits INT         NOT NULL DEFAULT 0 CHECK (nombre_d_inscrits >= 0)
 );
