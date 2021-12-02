@@ -119,7 +119,33 @@ public class Main {
     }
 
     public static void ajouterEtudiant(){
-        //TODO
+        System.out.println("Quel est le nom de l'étudiant?");
+        String nomEtudiant = scanner.next();
+
+        System.out.println("Quel est le prénom de l'étudiant?");
+        String prenomEtudiant = scanner.next();
+
+        System.out.println("Quel est l'email de l'étudiant?");
+        String emailEtudiant = scanner.next();
+
+        System.out.println("Quel est le mot de passe de l'étudiant?");
+        String sel = BCrypt.gensalt();
+        String motDePassse = BCrypt.hashpw(scanner.next(), sel);
+
+        try {
+            PreparedStatement ps = connexion.prepareStatement("SELECT project_sql.ajouter_etudiant(?, ?, ?, ?)");
+            ps.setString(1, nomEtudiant);
+            ps.setString(2, prenomEtudiant);
+            ps.setString(3, emailEtudiant);
+            ps.setString(4, motDePassse);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()){
+                    System.out.println("Ajout réussi!");
+                }
+            }
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     public static void encoderUeValidee(){
