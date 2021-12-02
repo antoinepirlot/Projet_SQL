@@ -79,23 +79,12 @@ CREATE TABLE project_sql.ues_pae
 /**
   Ajoute une ue dans la table ues
  */
-CREATE OR REPLACE FUNCTION project_sql.ajouter_ue(_code_ue VARCHAR(15), _nom VARCHAR(50),
+CREATE OR REPLACE FUNCTION project_sql.ajouter_ue(_code_ue VARCHAR(15), _nom VARCHAR(150),
                                                   _nombre_de_credits INT) RETURNS VOID AS
 $$
-DECLARE
-    _bloc INT;
 BEGIN
-    IF _code_ue LIKE 'BINV1%' THEN
-        _bloc = 1;
-    ELSIF _code_ue LIKE 'BINV2%' THEN
-        _bloc = 2;
-    ELSIF _code_ue LIKE 'BINV3%' THEN
-        _bloc = 3;
-    ELSE
-        RAISE 'Code de l''ue non conforme.';
-    END IF;
-
-    INSERT INTO project_sql.ues VALUES (DEFAULT, _code_ue, _nom, _bloc, _nombre_de_credits, DEFAULT);
+    -- Le bloc est déterminé grâce au trigger_verifier_ue
+    INSERT INTO project_sql.ues VALUES (DEFAULT, _code_ue, _nom, DEFAULT, _nombre_de_credits, DEFAULT);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -308,10 +297,10 @@ BEGIN
     GROUP BY id_etudiant
     INTO _etudiant;
 
-    IF NOT EXISTS (SELECT id_etudiant
-                   FROM project_sql.etudiants
-                   WHERE email = _email
-                   ) THEN
+    IF NOT EXISTS(SELECT id_etudiant
+                  FROM project_sql.etudiants
+                  WHERE email = _email
+        ) THEN
         RAISE 'L''étudiant n''existe pas' ;
     end if;
 
@@ -330,6 +319,34 @@ $$ LANGUAGE plpgsql;
 ---------------------------------------------------------------------------
 ----------------------PROCEDURES-WITH-TRIGGER------------------------------
 ---------------------------------------------------------------------------
+
+/**
+  Vérifie que le code de l'ue est correcte et attribue le bloc en fonction de ce code
+ */
+CREATE OR REPLACE FUNCTION project_sql.verifier_ue() RETURNS TRIGGER AS
+$$
+BEGIN
+    IF upper(NEW.code_ue) LIKE 'BINV1%' THEN
+        NEW.bloc = 1;
+    ELSIF upper(NEW.code_ue) LIKE 'BINV2%' THEN
+        NEW.bloc = 2;
+    ELSIF upper(NEW.code_ue) LIKE 'BINV3%' THEN
+        NEW.bloc = 3;
+    ELSE
+        RAISE 'Code ue non conforme.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_verifier_ue
+    BEFORE INSERT
+    ON project_sql.ues
+    FOR EACH ROW
+EXECUTE PROCEDURE project_sql.verifier_ue();
+
+---------------------------------------------------------------------
 
 /**
   Ajoute un pae à l''étudiant qui vient d''être créé.
@@ -547,7 +564,7 @@ EXECUTE PROCEDURE project_sql.augmenter_nombre_etudiants_inscrits();
 CREATE OR REPLACE FUNCTION project_sql.augmenter_credits_valides() RETURNS TRIGGER AS
 $$
 DECLARE
-    _ue RECORD;
+    _ue            RECORD;
     _ue_prerequise RECORD;
 BEGIN
     SELECT id_ue,
@@ -697,33 +714,36 @@ EXECUTE PROCEDURE project_sql.verifier_pae_reinitialisation();
   Visualise les étudiants avec le bloc
  */
 CREATE OR REPLACE VIEW project_sql.visualiser_tous_les_etudiants_bloc AS
-    SELECT nom,
-           prenom,
-           nombre_de_credits_valides,
-           bloc AS "bloc"
-    FROM project_sql.etudiants;
+SELECT nom,
+       prenom,
+       nombre_de_credits_valides,
+       bloc AS "bloc"
+FROM project_sql.etudiants;
 
 CREATE OR REPLACE VIEW project_sql.visualiser_pae as
-SELECT ue.code_ue, ue.nom, ue.nombre_de_credits, ue.bloc , e.email as "email"
-FROM project_sql.paes pae, project_sql.ues_pae ue_pae, project_sql.ues ue, project_sql.etudiants e
+SELECT ue.code_ue, ue.nom, ue.nombre_de_credits, ue.bloc, e.email as "email"
+FROM project_sql.paes pae,
+     project_sql.ues_pae ue_pae,
+     project_sql.ues ue,
+     project_sql.etudiants e
 WHERE pae.id_etudiant = e.id_etudiant
   AND ue_pae.code_pae = pae.code_pae
   AND ue.id_ue = ue_pae.id_ue
 ORDER BY ue.code_ue;
 
 CREATE OR REPLACE VIEW project_sql.visualiser_etudiant_pae_non_valide AS
-    SELECT e.nom AS "nom",
-           e.prenom AS "prenom",
-           e.nombre_de_credits_valides AS "Nombre de credits valide"
-    FROM project_sql.etudiants e,
-         project_sql.paes p
-    WHERE e.id_etudiant = p.id_etudiant
-      AND p.valide IS FALSE;
+SELECT e.nom                       AS "nom",
+       e.prenom                    AS "prenom",
+       e.nombre_de_credits_valides AS "Nombre de credits valide"
+FROM project_sql.etudiants e,
+     project_sql.paes p
+WHERE e.id_etudiant = p.id_etudiant
+  AND p.valide IS FALSE;
 
 CREATE OR REPLACE VIEW project_sql.visualier_ue_bloc AS
-    SELECT code_ue AS "code_ue",
-           nom AS "nom",
-           nombre_d_inscrits AS "nombre_inscrits",
-           bloc AS "bloc"
-    FROM project_sql.ues
-    ORDER BY nombre_d_inscrits;
+SELECT code_ue           AS "code_ue",
+       nom               AS "nom",
+       nombre_d_inscrits AS "nombre_inscrits",
+       bloc              AS "bloc"
+FROM project_sql.ues
+ORDER BY nombre_d_inscrits;

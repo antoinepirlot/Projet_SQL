@@ -26,6 +26,7 @@ public class Main {
             System.out.println("8 -> Visualiser les UEs d'un bloc en particulier");
 
             choix = scanner.nextInt();
+            scanner.nextLine();
             switch (choix) {
                 case 1 -> ajouterUe();
                 case 2 -> ajouterPrerequis();
@@ -45,13 +46,14 @@ public class Main {
 
     public static void ajouterUe() {
         System.out.println("Quel est le code de l'ue?");
-        String codeUe = scanner.next();
+        String codeUe = scanner.nextLine();
 
         System.out.println("Quel est le nom de l'ue?");
-        String nomUe = scanner.next();
+        String nomUe = scanner.nextLine();
 
         System.out.println("Quel est le nombre de crédits pour cette ue?");
         int nombreDeCredits = scanner.nextInt();
+        scanner.nextLine();
 
         try {
             PreparedStatement ps = connexion.prepareStatement("SELECT project_sql.ajouter_ue(?, ?, ?);");
@@ -199,14 +201,17 @@ public class Main {
             PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.visualier_ue_bloc WHERE \"bloc\" = ?");
             System.out.println("De quel bloc voulez vous voir les ues?");
             int bloc = scanner.nextInt();
+            scanner.nextLine();
             ps.setInt(1, bloc);
             try (ResultSet rs = ps.executeQuery()){
-                if(!rs.next())
-                    System.out.println("Il n'y a pas d'ue pour ce bloc.");
+                boolean uePresentes = false;
                 while (rs.next()){
                     System.out.println("Code de l'ue: "+ rs.getString(1) + ", nom de l'ue: " + rs.getString(2) +
                             ", nombre d'inscrits: " + rs.getString(3));
+                    uePresentes = true;
                 }
+                if(!uePresentes)
+                    System.out.println("Il n'y a aucune UE pour ce bloc.");
             }
         } catch (SQLException e){
             System.out.println(e.getMessage());
