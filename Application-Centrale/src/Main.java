@@ -101,7 +101,7 @@ public class Main {
         System.out.println("Quel est le code de l'ue?");
         String code_ue = scanner.next();
 
-        System.out.println("QUel est le code de l'ue prérequise?");
+        System.out.println("Quel est le code de l'ue prérequise?");
         String code_ue_prerequise = scanner.next();
 
         try {
