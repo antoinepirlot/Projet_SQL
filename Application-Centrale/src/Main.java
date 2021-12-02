@@ -12,11 +12,6 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Bienvenue dans l'application centrale dédiée aux administrateurs.");
 
-        /*String pseudo, mdp;
-        System.out.println("Quel est ton mot de passe?");
-        String sel = BCrypt.gensalt();
-        mdp = BCrypt.hashpw(scanner.next(), sel);*/
-
         int choix;
         do {
             System.out.println();
