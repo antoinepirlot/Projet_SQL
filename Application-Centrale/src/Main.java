@@ -198,7 +198,7 @@ public class Main {
                 while (rs.next()){
                     System.out.print("Nom: " + rs.getString(1) + " ");
                     System.out.print("Prénom: " + rs.getString(2) + " ");
-                    System.out.print("Nombre de crédits déjà validés: " + rs.getInt(3) + " ");
+                    System.out.println("Nombre de crédits déjà validés: " + rs.getInt(3) + " ");
                 }
             }
         } catch (SQLException e) {
