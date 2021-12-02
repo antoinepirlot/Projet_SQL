@@ -61,27 +61,6 @@ public class Main {
            connexion_etudiant = connexion_etudiant(conn, emailEtudiant, passwordEtudiant);
        }
 
-        /*
-        try {
-            PreparedStatement ps = conn.prepareStatement("SELECT * FROM project_sql.connexion_etudiant(?)");
-            ps.setString(1, emailEtudiant);
-            //ps.setString(2, passwordEtudiant);
-            //ps.executeUpdate();
-            try (ResultSet rs = ps.executeQuery()){
-                while (rs.next()){
-                    String passwordHash = rs.getString(1);
-                    if (!com.berry.BCrypt.checkpw(passwordEtudiant, passwordHash)){
-                        // TODO
-                        System.out.println("Le mot de passe ou l'email est faux");
-
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        */
 
         do{
             System.out.println("Que voulez vous faire?");
@@ -141,9 +120,9 @@ public class Main {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            e.getMessage();
         }
         System.out.println("Vous êtes connecté à l'email : " + emailEtudiant);
-        //System.out.println(passwordHash);
         return true;
 
     }

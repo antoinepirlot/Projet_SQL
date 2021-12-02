@@ -296,6 +296,13 @@ BEGIN
     GROUP BY id_etudiant
     INTO _etudiant;
 
+    IF NOT EXISTS (SELECT id_etudiant
+                   FROM project_sql.etudiants
+                   WHERE email = _email
+                   ) THEN
+        RAISE 'L''étudiant n''existe pas' ;
+    end if;
+
     --TODO à mettre dans un TRIGGER
     IF _etudiant.count = 0 THEN
         RAISE 'L''émail ou le mot de passe est incorrect';
@@ -593,7 +600,7 @@ BEGIN
     -- Si la somme des crédits précédemment validés et ceux du PAE atteignent 180, le PAE
     -- ne peut pas dépasser 74 crédits
     IF (_etudiant_et_pae.nombre_de_credits_valides + _etudiant_et_pae.nombre_de_credits_total = 180 AND
-        _etudiant_et_pae > 74) THEN
+        _etudiant_et_pae.nombre_de_credits_total > 74) THEN
         RAISE 'Impossible de valider le pae, il doit y avoir au maximum 74 crédits.';
     END IF;
 
@@ -609,13 +616,13 @@ BEGIN
     END IF;
 
     --Mets un etudiant au bloc 3 si la somme de ses crédits en cours et ceux validé sont de 180 ou plus
-    IF _etudiant_et_pae + _etudiant_et_pae >= 180 THEN
+    IF _etudiant_et_pae.nombre_de_credits_total + _etudiant_et_pae.nombre_de_credits_valides >= 180 THEN
         UPDATE project_sql.etudiants
         SET bloc = 3
         WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
 
         --Mets l''étudiant en bloc 1 si ses crédits validés sont strictement inférieur à 45
-    ELSIF _etudiant_et_pae < 45 THEN
+    ELSIF _etudiant_et_pae.nombre_de_credits_valides < 45 THEN
         UPDATE project_sql.etudiants
         SET bloc = 1
         WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
@@ -700,7 +707,8 @@ CREATE OR REPLACE VIEW project_sql.visualiser_etudiant_pae_non_valide AS
     WHERE e.id_etudiant = p.id_etudiant
       AND p.valide IS FALSE;
 
-/*
-SELECT ue.code_ue, ue.nom, ue.nombre_de_credits, ue.bloc , e.prenom, e.nom FROM project_sql.paes pae, project_sql.ues_pae ue_pae, project_sql.ues ue, project_sql.etudiants e
-WHERE e.email = ? AND pae.id_etudiant = e.id_etudiant AND ue_pae.code_pae = pae.code_pae AND ue.id_ue = ue_pae.id_ue
-*/
+INSERT INTO project_sql.etudiants VALUES(DEFAULT, 'Nico', 'Sakou', 'nini', '$2a$12$qCH4ir6db5rIx.f11/I0kOpbiO.1OT6mP5p.JAEffl71n2tve6eY2', DEFAULT, DEFAULT);
+INSERT INTO project_sql.ues VALUES (DEFAULT, 'BINV', 'Java', 1, 5, DEFAULT);
+INSERT INTO project_sql.ues VALUES (DEFAULT, 'BINV1', 'BD', 1, 60, DEFAULT);
+
+INSERT INTO project_sql.ues_validees VALUES (1,1);
