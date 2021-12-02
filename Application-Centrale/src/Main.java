@@ -27,34 +27,18 @@ public class Main {
 
             choix = scanner.nextInt();
             switch (choix) {
-                case 1:
-                    ajouterUe();
-                    break;
-                case 2:
-                    ajouterPrerequis();
-                    break;
-                case 3:
-                    ajouterEtudiant();
-                    break;
-                case 4:
-                    encoderUeValidee();
-                    break;
-                case 5:
-                    visualiserTousLesEtudiantDUnBloc();
-                    break;
-                case 6:
-                    visualiserTout();
-                    break;
-                case 7:
-                    visualiserEtudiantPAENonValide();
-                    break;
-                case 8:
-                    visualiserUEDUnBloc();
-                    break;
-                default:
+                case 1 -> ajouterUe();
+                case 2 -> ajouterPrerequis();
+                case 3 -> ajouterEtudiant();
+                case 4 -> encoderUeValidee();
+                case 5 -> visualiserTousLesEtudiantDUnBloc();
+                case 6 -> visualiserTout();
+                case 7 -> visualiserEtudiantPAENonValide();
+                case 8 -> visualiserUEDUnBloc();
+                default -> {
                     System.out.println("Fin du programme. Bonne journée.");
                     System.out.println();
-                    break;
+                }
             }
         } while (1 <= choix && choix <= 8);
     }
