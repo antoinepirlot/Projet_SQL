@@ -1,5 +1,6 @@
 import com.berry.BCrypt;
 
+import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 import java.util.Scanner;
 
@@ -206,7 +207,18 @@ public class Main {
     }
 
     public static void visualiserEtudiantPAENonValide() {
-        //TODO
+        try {
+            PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.visualiser_etudiant_pae_non_valide");
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()){
+                    System.out.print("Nom: " + rs.getString(1) + " ");
+                    System.out.print("Prénom: " + rs.getString(2) + " ");
+                    System.out.print("Nombre de crédits déjà validés: " + rs.getInt(3) + " ");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public static void visualiserUEDUnBloc() {
