@@ -17,7 +17,7 @@ public class Main {
         mdp = BCrypt.hashpw(scanner.next(), sel);*/
 
         int choix;
-        do{
+        do {
             System.out.println();
             System.out.println("Que voulez vous faire?");
             System.out.println();
@@ -65,7 +65,7 @@ public class Main {
         } while (1 <= choix && choix <= 8);
     }
 
-    public static void ajouterUe(){
+    public static void ajouterUe() {
         System.out.println("Quel est le code de l'ue?");
         String codeUe = scanner.next();
 
@@ -78,25 +78,25 @@ public class Main {
         System.out.println("Quel est le nombre de crédits pour cette ue?");
         int nombreDeCredits = scanner.nextInt();
 
-        try{
+        try {
             PreparedStatement ps = connexion.prepareStatement("SELECT project_sql.ajouter_ue(?, ?, ?, ?);");
             ps.setString(1, codeUe);
             ps.setString(2, nomUe);
             ps.setInt(3, bloc);
             ps.setInt(4, nombreDeCredits);
-            try(ResultSet rs = ps.executeQuery()){
-                while (rs.next()){
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
                     System.out.println("L'ue a bien été ajoutée.");
                 }
             }
 
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println("Erreur lors de l'insertion!");
             System.out.println(e.getMessage());
         }
     }
 
-    public static void ajouterPrerequis(){
+    public static void ajouterPrerequis() {
         System.out.println("Quel est le code de l'ue?");
         String code_ue = scanner.next();
 
@@ -107,18 +107,18 @@ public class Main {
             PreparedStatement ps = connexion.prepareStatement("SELECT project_sql.ajouter_prerequis_ue(?, ?);");
             ps.setString(1, code_ue);
             ps.setString(2, code_ue_prerequise);
-            try(ResultSet rs = ps.executeQuery()){
-                while (rs.next()){
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
                     System.out.println("Ajout réussi!");
                 }
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println("Problème lors de l'insertion.");
             System.out.println(e.getMessage());
         }
     }
 
-    public static void ajouterEtudiant(){
+    public static void ajouterEtudiant() {
         System.out.println("Quel est le nom de l'étudiant?");
         String nomEtudiant = scanner.next();
 
@@ -138,21 +138,38 @@ public class Main {
             ps.setString(2, prenomEtudiant);
             ps.setString(3, emailEtudiant);
             ps.setString(4, motDePassse);
-            try (ResultSet rs = ps.executeQuery()){
-                while (rs.next()){
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
                     System.out.println("Ajout réussi!");
                 }
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public static void encoderUeValidee(){
-        //TODO
+    public static void encoderUeValidee() {
+        System.out.println("Quel est l'email de l'étudiant?");
+        String emailEtudiant = scanner.next();
+
+        System.out.println("Quel est le code de l'ue a valider?");
+        String codeUe = scanner.next();
+
+        try {
+            PreparedStatement ps = connexion.prepareStatement("SELECT project_sql.encoder_ue_validee(?, ?);");
+            ps.setString(1, emailEtudiant);
+            ps.setString(2, codeUe);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    System.out.println("Validation réussie");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
-    public static void visualiserTousLesEtudiantDUnBloc(){
+    public static void visualiserTousLesEtudiantDUnBloc() {
         int bloc = -1;
         while (bloc < 0 || bloc > 3) {
             System.out.println("De quel bloc voulez vous voir les étudiant?");
@@ -164,15 +181,15 @@ public class Main {
         }
         String query;
         try {
-            if(bloc == 0)
+            if (bloc == 0)
                 query = """
                         SELECT nom, prenom, nombre_de_credits_valides FROM project_sql.etudiants WHERE "bloc" IS NULL
                         """;
             else
-                query = "SELECT nom, prenom, nombre_de_credits_valides FROM project_sql.etudiants WHERE \"bloc\" ="+bloc+"";
+                query = "SELECT nom, prenom, nombre_de_credits_valides FROM project_sql.etudiants WHERE \"bloc\" =" + bloc + "";
             Statement statement = connexion.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 String nom = resultSet.getString(1);
                 String prenom = resultSet.getString(2);
                 String nombreDeCredits = resultSet.getString(3);
@@ -184,22 +201,22 @@ public class Main {
         }
     }
 
-    public static void visualiserTout(){
+    public static void visualiserTout() {
         //TODO � voir si le nom doit changer ou pas (de la fonction)
     }
 
-    public static void visualiserEtudiantPAENonValide(){
+    public static void visualiserEtudiantPAENonValide() {
         //TODO
     }
 
-    public static void visualiserUEDUnBloc(){
+    public static void visualiserUEDUnBloc() {
         //TODO
     }
 
-    private static Connection connexionDb(){
+    private static Connection connexionDb() {
         try {
             Class.forName("org.postgresql.Driver");
-        } catch (ClassNotFoundException e){
+        } catch (ClassNotFoundException e) {
             System.out.println("Driver PostgeSQL manquant!");
             System.exit(1);
         }
@@ -208,7 +225,7 @@ public class Main {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(url, "postgres", "06192000");
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println("Impossible de joindre le server !");
             System.exit(1);
         }
