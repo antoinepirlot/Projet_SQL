@@ -50,7 +50,7 @@ CREATE TABLE project_sql.paes
     code_pae                SERIAL PRIMARY KEY,
     id_etudiant             INT  NOT NULL UNIQUE,
     valide                  BOOL NOT NULL DEFAULT FALSE,
-    nombre_de_credits_total INT  NOT NULL DEFAULT 0 CHECK ( valide IS FALSE AND nombre_de_credits_total >= 0 ),
+    nombre_de_credits_total INT  NOT NULL DEFAULT 0 CHECK (nombre_de_credits_total >= 0 ),
     FOREIGN KEY (id_etudiant) REFERENCES project_sql.etudiants (id_etudiant)
 );
 
@@ -289,7 +289,7 @@ $$
 DECLARE
     _etudiant RECORD;
 BEGIN
-    /*
+
     SELECT id_etudiant, COUNT(*) AS "count"
     FROM project_sql.etudiants
     WHERE email = _email
@@ -302,7 +302,7 @@ BEGIN
     END IF;
 
     --TODO CREATE USER etc
-    RETURN _etudiant.id_etudiant;*/
+    --RETURN _etudiant.id_etudiant;
 
     RETURN QUERY SELECT mot_de_passe FROM project_sql.etudiants e WHERE e.email = _email;
 END;
@@ -581,10 +581,10 @@ BEGIN
     INTO _etudiant_et_pae;
 
     -- Verifie que le pae n''est pas déjà validé
+    /*
     IF _etudiant_et_pae.valide IS TRUE THEN
         RAISE 'PAE déjà validé';
-    END IF;
-
+    END IF; */
     -- Si la somme des crédits précédemment validés et ceux du PAE atteignent 180, le PAE
     -- ne peut pas dépasser 74 crédits
     IF (_etudiant_et_pae.nombre_de_credits_valides + _etudiant_et_pae.nombre_de_credits_total = 180 AND

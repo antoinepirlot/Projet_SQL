@@ -1,16 +1,9 @@
+import com.berry.BCrypt;
 
 import java.io.FileInputStream;
-/*
-import java.io.FileNotFoundException;
-import java.io.IOException;*/
 import java.sql.*;
-//import java.sql.Connection;
-//import java.sql.DriverManager;
-//import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Scanner;
-
-
 
 
 public class Main {
@@ -139,7 +132,7 @@ public class Main {
             try (ResultSet rs = ps.executeQuery()){
                 while (rs.next()){
                     String passwordHash = rs.getString(1);
-                    if (!com.berry.BCrypt.checkpw(passwordEtudiant, passwordHash)){
+                    if (!BCrypt.checkpw(passwordEtudiant, passwordHash)){
                         // TODO
                         System.out.println("Le mot de passe ou l'email est faux");
                         return false;
