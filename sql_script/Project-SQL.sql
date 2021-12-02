@@ -714,16 +714,20 @@ EXECUTE PROCEDURE project_sql.verifier_pae_reinitialisation();
   Visualise les étudiants avec le bloc
  */
 CREATE OR REPLACE VIEW project_sql.visualiser_tous_les_etudiants_bloc AS
-SELECT nom,
-       prenom,
-       nombre_de_credits_valides,
-       bloc AS "bloc"
+SELECT DISTINCT nom                       AS "nom",
+                prenom                    AS "prenom",
+                nombre_de_credits_valides AS "nombre_de_credits_valides",
+                bloc                      AS "bloc"
 FROM project_sql.etudiants;
 
 ---------------------------------------------------------------------
 
 CREATE OR REPLACE VIEW project_sql.visualiser_pae as
-SELECT ue.code_ue, ue.nom, ue.nombre_de_credits, ue.bloc, e.email as "email"
+SELECT DISTINCT ue.code_ue           AS "code_ue",
+                ue.nom               AS "nom",
+                ue.nombre_de_credits AS "nombre_de_credits",
+                ue.bloc              AS "bloc",
+                e.email              AS "email"
 FROM project_sql.paes pae,
      project_sql.ues_pae ue_pae,
      project_sql.ues ue,
@@ -736,9 +740,9 @@ ORDER BY ue.code_ue;
 ---------------------------------------------------------------------
 
 CREATE OR REPLACE VIEW project_sql.visualiser_etudiant_pae_non_valide AS
-SELECT e.nom                       AS "nom",
-       e.prenom                    AS "prenom",
-       e.nombre_de_credits_valides AS "Nombre de credits valide"
+SELECT DISTINCT e.nom                       AS "nom",
+                e.prenom                    AS "prenom",
+                e.nombre_de_credits_valides AS "Nombre de credits valide"
 FROM project_sql.etudiants e,
      project_sql.paes p
 WHERE e.id_etudiant = p.id_etudiant
@@ -755,10 +759,10 @@ FROM project_sql.ues
 ORDER BY nombre_d_inscrits;
 
 CREATE OR REPLACE VIEW project_sql.visualiser_tous_les_etudiants AS
-    SELECT e.nom AS "nom",
-           e.prenom AS "prenom",
-           e.bloc,
-           p.nombre_de_credits_total AS "nombre_de_credits_pae"
-    FROM project_sql.etudiants e,
-         project_sql.paes p
-    ORDER BY p.nombre_de_credits_total;
+SELECT DISTINCT e.nom                     AS "nom",
+                e.prenom                  AS "prenom",
+                e.bloc,
+                p.nombre_de_credits_total AS "nombre_de_credits_pae"
+FROM project_sql.etudiants e,
+     project_sql.paes p
+ORDER BY p.nombre_de_credits_total;
