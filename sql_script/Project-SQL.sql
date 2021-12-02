@@ -79,10 +79,22 @@ CREATE TABLE project_sql.ues_pae
 /**
   Ajoute une ue dans la table ues
  */
-CREATE OR REPLACE FUNCTION project_sql.ajouter_ue(_code_ue VARCHAR(15), _nom VARCHAR(50), _bloc INT,
+CREATE OR REPLACE FUNCTION project_sql.ajouter_ue(_code_ue VARCHAR(15), _nom VARCHAR(50),
                                                   _nombre_de_credits INT) RETURNS VOID AS
 $$
+DECLARE
+    _bloc INT;
 BEGIN
+    IF _code_ue LIKE 'BINV1%' THEN
+        _bloc = 1;
+    ELSIF _code_ue LIKE 'BINV2%' THEN
+        _bloc = 2;
+    ELSIF _code_ue LIKE 'BINV3%' THEN
+        _bloc = 3;
+    ELSE
+        RAISE 'Code de l''ue non conforme.';
+    END IF;
+
     INSERT INTO project_sql.ues VALUES (DEFAULT, _code_ue, _nom, _bloc, _nombre_de_credits, DEFAULT);
 END;
 $$ LANGUAGE plpgsql;
@@ -437,7 +449,7 @@ BEGIN
                 FROM project_sql.ues_validees
                 WHERE id_ue = _ue_prerequise.id_ue_prerequise
                   AND id_etudiant = _etudiant_et_pae.id_etudiant) = 0 THEN
-                RAISE 'L''''étudiant n''''a pas validé une ue prérequise.';
+                RAISE 'L''étudiant n''a pas validé une ue prérequise.';
             END IF;
         END LOOP;
 
@@ -457,6 +469,7 @@ CREATE TRIGGER trigger_augmenter_nombre_de_credits_pae
 EXECUTE PROCEDURE project_sql.augmenter_nombre_de_credits_pae();
 
 ---------------------------------------------------------------------
+
 CREATE OR REPLACE FUNCTION project_sql.diminuer_nombre_de_credits_pae() RETURNS TRIGGER AS
 $$
 DECLARE
@@ -707,8 +720,10 @@ CREATE OR REPLACE VIEW project_sql.visualiser_etudiant_pae_non_valide AS
     WHERE e.id_etudiant = p.id_etudiant
       AND p.valide IS FALSE;
 
-INSERT INTO project_sql.etudiants VALUES(DEFAULT, 'Nico', 'Sakou', 'nini', '$2a$12$qCH4ir6db5rIx.f11/I0kOpbiO.1OT6mP5p.JAEffl71n2tve6eY2', DEFAULT, DEFAULT);
-INSERT INTO project_sql.ues VALUES (DEFAULT, 'BINV', 'Java', 1, 5, DEFAULT);
-INSERT INTO project_sql.ues VALUES (DEFAULT, 'BINV1', 'BD', 1, 60, DEFAULT);
-
-INSERT INTO project_sql.ues_validees VALUES (1,1);
+CREATE OR REPLACE VIEW project_sql.visualier_ue_bloc AS
+    SELECT code_ue AS "code_ue",
+           nom AS "nom",
+           nombre_d_inscrits AS "nombre_inscrits",
+           bloc AS "bloc"
+    FROM project_sql.ues
+    ORDER BY nombre_d_inscrits;

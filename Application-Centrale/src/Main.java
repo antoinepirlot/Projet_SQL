@@ -80,11 +80,10 @@ public class Main {
         int nombreDeCredits = scanner.nextInt();
 
         try {
-            PreparedStatement ps = connexion.prepareStatement("SELECT project_sql.ajouter_ue(?, ?, ?, ?);");
+            PreparedStatement ps = connexion.prepareStatement("SELECT project_sql.ajouter_ue(?, ?, ?);");
             ps.setString(1, codeUe);
             ps.setString(2, nomUe);
-            ps.setInt(3, bloc);
-            ps.setInt(4, nombreDeCredits);
+            ps.setInt(3, nombreDeCredits);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     System.out.println("L'ue a bien été ajoutée.");
