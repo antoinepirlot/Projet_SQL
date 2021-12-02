@@ -686,10 +686,6 @@ WHERE pae.id_etudiant = e.id_etudiant
   AND ue.id_ue = ue_pae.id_ue
 ORDER BY ue.code_ue;
 
-INSERT INTO project_sql.etudiants VALUES (DEFAULT, 'Nico', 'Sakou','nini', '$2a$12$Wz3Df.sBC4veLQ8bq1siEeTXZ.T.2.2V99jHnV1V8fwkM/5YuJ7wu' );
-INSERT INTO project_sql.ues VALUES (DEFAULT, 'BINV','Java',1,5, DEFAULT );
-INSERT INTO project_sql.ues VALUES (DEFAULT, 'BINV1','BD',1,4, DEFAULT );
-
 /*
 SELECT ue.code_ue, ue.nom, ue.nombre_de_credits, ue.bloc , e.prenom, e.nom FROM project_sql.paes pae, project_sql.ues_pae ue_pae, project_sql.ues ue, project_sql.etudiants e
 WHERE e.email = ? AND pae.id_etudiant = e.id_etudiant AND ue_pae.code_pae = pae.code_pae AND ue.id_ue = ue_pae.id_ue
