@@ -33,7 +33,7 @@ public class Main {
                 case 3 -> ajouterEtudiant();
                 case 4 -> encoderUeValidee();
                 case 5 -> visualiserTousLesEtudiantDUnBloc();
-                case 6 -> visualiserTout();
+                case 6 -> visualiserTousLesEtudiants();
                 case 7 -> visualiserEtudiantPAENonValide();
                 case 8 -> visualiserUEDUnBloc();
                 default -> {
@@ -177,8 +177,18 @@ public class Main {
         }
     }
 
-    public static void visualiserTout() {
-        //TODO � voir si le nom doit changer ou pas (de la fonction)
+    public static void visualiserTousLesEtudiants() {
+        try{
+            PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.visualiser_tous_les_etudiants");
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()){
+                    System.out.println("Nom: " + rs.getString(1) + ", Prénom: " + rs.getString(2) +
+                            ", bloc: " + rs.getString(3) + ", nombre de crédits dans le pae: " + rs.getString(4));
+                }
+            }
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     public static void visualiserEtudiantPAENonValide() {

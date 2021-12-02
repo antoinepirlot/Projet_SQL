@@ -720,6 +720,8 @@ SELECT nom,
        bloc AS "bloc"
 FROM project_sql.etudiants;
 
+---------------------------------------------------------------------
+
 CREATE OR REPLACE VIEW project_sql.visualiser_pae as
 SELECT ue.code_ue, ue.nom, ue.nombre_de_credits, ue.bloc, e.email as "email"
 FROM project_sql.paes pae,
@@ -731,6 +733,8 @@ WHERE pae.id_etudiant = e.id_etudiant
   AND ue.id_ue = ue_pae.id_ue
 ORDER BY ue.code_ue;
 
+---------------------------------------------------------------------
+
 CREATE OR REPLACE VIEW project_sql.visualiser_etudiant_pae_non_valide AS
 SELECT e.nom                       AS "nom",
        e.prenom                    AS "prenom",
@@ -740,6 +744,8 @@ FROM project_sql.etudiants e,
 WHERE e.id_etudiant = p.id_etudiant
   AND p.valide IS FALSE;
 
+---------------------------------------------------------------------
+
 CREATE OR REPLACE VIEW project_sql.visualier_ue_bloc AS
 SELECT code_ue           AS "code_ue",
        nom               AS "nom",
@@ -747,3 +753,12 @@ SELECT code_ue           AS "code_ue",
        bloc              AS "bloc"
 FROM project_sql.ues
 ORDER BY nombre_d_inscrits;
+
+CREATE OR REPLACE VIEW project_sql.visualiser_tous_les_etudiants AS
+    SELECT e.nom AS "nom",
+           e.prenom AS "prenom",
+           e.bloc,
+           p.nombre_de_credits_total AS "nombre_de_credits_pae"
+    FROM project_sql.etudiants e,
+         project_sql.paes p
+    ORDER BY p.nombre_de_credits_total;
