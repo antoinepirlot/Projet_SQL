@@ -10,7 +10,6 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Bienvenue dans l'application centrale dédiée aux administrateurs.");
-        System.out.println();
 
         /*String pseudo, mdp;
         System.out.println("Quel est ton mot de passe?");
@@ -19,6 +18,7 @@ public class Main {
 
         int choix;
         do{
+            System.out.println();
             System.out.println("Que voulez vous faire?");
             System.out.println();
 
@@ -79,18 +79,43 @@ public class Main {
         int nombreDeCredits = scanner.nextInt();
 
         try{
-            PreparedStatement s = (PreparedStatement) connexion.createStatement();
-            s.executeUpdate();
+            PreparedStatement ps = connexion.prepareStatement("SELECT project_sql.ajouter_ue(?, ?, ?, ?);");
+            ps.setString(1, codeUe);
+            ps.setString(2, nomUe);
+            ps.setInt(3, bloc);
+            ps.setInt(4, nombreDeCredits);
+            try(ResultSet rs = ps.executeQuery()){
+                while (rs.next()){
+                    System.out.println("L'ue a bien été ajoutée.");
+                }
+            }
 
         } catch (SQLException e){
             System.out.println("Erreur lors de l'insertion!");
-            e.printStackTrace();
-            System.exit(1);
+            System.out.println(e.getMessage());
         }
     }
 
     public static void ajouterPrerequis(){
-        //TODO
+        System.out.println("Quel est le code de l'ue?");
+        String code_ue = scanner.next();
+
+        System.out.println("QUel est le code de l'ue prérequise?");
+        String code_ue_prerequise = scanner.next();
+
+        try {
+            PreparedStatement ps = connexion.prepareStatement("SELECT project_sql.ajouter_prerequis_ue(?, ?);");
+            ps.setString(1, code_ue);
+            ps.setString(2, code_ue_prerequise);
+            try(ResultSet rs = ps.executeQuery()){
+                while (rs.next()){
+                    System.out.println("Ajout réussi!");
+                }
+            }
+        } catch (SQLException e){
+            System.out.println("Problème lors de l'insertion.");
+            System.out.println(e.getMessage());
+        }
     }
 
     public static void ajouterEtudiant(){
