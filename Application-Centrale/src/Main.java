@@ -105,6 +105,7 @@ public class Main {
         int bloc = -1;
         while (bloc < 0 || bloc > 3) {
             System.out.println("De quel bloc voulez vous voir les étudiant?");
+            System.out.println("0 -> Bloc indéterminé");
             System.out.println("1 -> Bloc 1");
             System.out.println("2 -> Bloc 2");
             System.out.println("3 -> Bloc 3");
