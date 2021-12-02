@@ -222,7 +222,22 @@ public class Main {
     }
 
     public static void visualiserUEDUnBloc() {
-        //TODO
+        try{
+            PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.visualier_ue_bloc WHERE \"bloc\" = ?");
+            System.out.println("De quel bloc voulez vous voir les ues?");
+            int bloc = scanner.nextInt();
+            ps.setInt(1, bloc);
+            try (ResultSet rs = ps.executeQuery()){
+                if(!rs.next())
+                    System.out.println("Il n'y a pas d'ue pour ce bloc.");
+                while (rs.next()){
+                    System.out.println("Code de l'ue: "+ rs.getString(1) + ", nom de l'ue: " + rs.getString(2) +
+                            ", nombre d'inscrits: " + rs.getString(3));
+                }
+            }
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     private static Connection connexionDb() {
