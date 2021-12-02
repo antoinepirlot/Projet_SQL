@@ -66,9 +66,6 @@ public class Main {
         System.out.println("Quel est le nom de l'ue?");
         String nomUe = scanner.next();
 
-        System.out.println("Quel est le bloc de l'ue?");
-        int bloc = scanner.nextInt();
-
         System.out.println("Quel est le nombre de crédits pour cette ue?");
         int nombreDeCredits = scanner.nextInt();
 
