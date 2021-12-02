@@ -9,7 +9,7 @@ public class Main {
     private static final Connection connexion = connexionDb();
 
     public static void main(String[] args) {
-        System.out.println("Bienvenue dans l'application centrale d�di�es aux administrateurs.");
+        System.out.println("Bienvenue dans l'application centrale dédiée aux administrateurs.");
         System.out.println();
 
         /*String pseudo, mdp;
@@ -23,12 +23,12 @@ public class Main {
             System.out.println();
 
             System.out.println("1 -> Ajouter une ue");
-            System.out.println("2 -> Ajouter un prerequis � une ue existante");
-            System.out.println("3 -> Ajouter un �tudiant");
-            System.out.println("4 -> Encoder une ue valid�e pour un �tudiant");
-            System.out.println("5 -> Visualiser tous les �tudiants d'un bloc particulier");
-            System.out.println("6 -> Visualiser tous les �tudiants");
-            System.out.println("7 -> Visualiser tous les �tudiants qui n'ont pas encore valid� leur PAE");
+            System.out.println("2 -> Ajouter un prerequis à une ue existante");
+            System.out.println("3 -> Ajouter un étudiant");
+            System.out.println("4 -> Encoder une ue validée pour un étudiant");
+            System.out.println("5 -> Visualiser tous les étudiants d'un bloc particulier");
+            System.out.println("6 -> Visualiser tous les étudiants");
+            System.out.println("7 -> Visualiser tous les étudiants qui n'ont pas encore validé leur PAE");
             System.out.println("8 -> Visualiser les UEs d'un bloc en particulier");
 
             choix = scanner.nextInt();
@@ -58,7 +58,7 @@ public class Main {
                     visualiserUEDUnBloc();
                     break;
                 default:
-                    System.out.println("Fin du programme. Bonne journ�e.");
+                    System.out.println("Fin du programme. Bonne journée.");
                     System.out.println();
                     break;
             }
@@ -75,12 +75,12 @@ public class Main {
         System.out.println("Quel est le bloc de l'ue?");
         int bloc = scanner.nextInt();
 
-        System.out.println("Quel est le nombre de cr�dits pour cette ue?");
+        System.out.println("Quel est le nombre de crédits pour cette ue?");
         int nombreDeCredits = scanner.nextInt();
 
         try{
             PreparedStatement s = (PreparedStatement) connexion.createStatement();
-            s.executeUpdate("SELECT project_sql.ajouter_ue("+codeUe+", "+nomUe+", "+bloc+", "+nombreDeCredits+");");
+            s.executeUpdate();
 
         } catch (SQLException e){
             System.out.println("Erreur lors de l'insertion!");
