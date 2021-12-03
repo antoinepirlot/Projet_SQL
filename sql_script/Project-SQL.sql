@@ -27,7 +27,7 @@ CREATE TABLE project_sql.etudiants
 CREATE TABLE project_sql.ues
 (
     id_ue             SERIAL PRIMARY KEY,
-    code_ue           VARCHAR(15) NOT NULL UNIQUE CHECK ( upper(code_ue) LIKE 'BINV1%' OR upper(code_ue) LIKE 'BINV2%' OR upper(code_ue) LIKE 'BINV3%'),
+    code_ue           VARCHAR(15) NOT NULL UNIQUE CHECK ( code_ue LIKE 'BINV1%' OR code_ue LIKE 'BINV2%' OR code_ue LIKE 'BINV3%'),
     nom               VARCHAR(50) NOT NULL,
     bloc              INT         NOT NULL CHECK (bloc = 1 OR bloc = 2 OR bloc = 3),
     nombre_de_credits INT         NOT NULL CHECK ( nombre_de_credits > 0 ),
@@ -312,6 +312,27 @@ BEGIN
     --RETURN _etudiant.id_etudiant;
 
     RETURN QUERY SELECT mot_de_passe FROM project_sql.etudiants e WHERE e.email = _email;
+END;
+$$ LANGUAGE plpgsql;
+
+---------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION project_sql.a_valider_les_ues_prerequises(_id_ue INT, _id_etudiant INT) RETURNS BOOLEAN AS
+$$
+DECLARE
+    _ue_prerequise RECORD;
+BEGIN
+    FOR _ue_prerequise IN (SELECT id_ue_prerequise
+                           FROM project_sql.prerequis
+                           WHERE id_ue = _id_ue) LOOP
+            IF _ue_prerequise.id_ue_prerequise NOT IN (SELECT id_ue
+                                                       FROM project_sql.ues_validees
+                                                       WHERE id_etudiant = _id_etudiant) THEN
+                RETURN FALSE;
+            END IF;
+        END LOOP;
+
+    RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -760,12 +781,26 @@ WHERE e.id_etudiant = p.id_etudiant
   AND p.valide IS FALSE;
 
 ---------------------------------------------------------------------
+
 CREATE OR REPLACE VIEW project_sql.visualiser_ue_disponible_pae AS
-    SELECT ue.code_ue , ue.nom, ue.nombre_de_credits, ue.bloc, e.email as "email"
-    FROM project_sql.ues ue, project_sql.etudiants e
-    WHERE ue.id_ue NOT IN (SELECT ue_validee.id_ue FROM project_sql.ues_validees ue_validee, project_sql.etudiants e WHERE  e.id_etudiant = ue_validee.id_etudiant)
-    AND ue.id_ue NOT IN (SELECT ue_pae.id_ue FROM project_sql.ues_pae ue_pae , project_sql.etudiants e, project_sql.paes pae WHERE ue_pae.code_pae = pae.code_pae AND e.id_etudiant = pae.id_etudiant)
-    ORDER BY ue.code_ue;
+SELECT  ue.code_ue,
+        ue.nom,
+        ue.nombre_de_credits,
+        ue.bloc,
+        e.email AS "email"
+FROM project_sql.etudiants e,
+     project_sql.ues ue
+WHERE ((ue.bloc = 1
+        AND (SELECT e2.nombre_de_credits_valides
+                 FROM project_sql.etudiants e2
+                 WHERE e2.id_etudiant = e.id_etudiant) < 30)
+        OR ((SELECT e2.nombre_de_credits_valides
+            FROM project_sql.etudiants e2
+            WHERE e2.id_etudiant = e.id_etudiant) >= 30
+               AND project_sql.a_valider_les_ues_prerequises(ue.id_ue, e.id_etudiant)))
+        AND ue.id_ue NOT IN (SELECT uv.id_ue
+                             FROM project_sql.ues_validees uv
+                             WHERE uv.id_etudiant = e.id_etudiant);
 
 ---------------------------------------------------------------------
 

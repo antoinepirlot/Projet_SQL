@@ -1,4 +1,5 @@
 INSERT INTO project_sql.prerequis (id_ue, id_ue_prerequise) VALUES (14, 4);
+INSERT INTO project_sql.prerequis (id_ue, id_ue_prerequise) VALUES (14, 8);
 INSERT INTO project_sql.prerequis (id_ue, id_ue_prerequise) VALUES (15, 2);
 INSERT INTO project_sql.prerequis (id_ue, id_ue_prerequise) VALUES (15, 3);
 INSERT INTO project_sql.prerequis (id_ue, id_ue_prerequise) VALUES (16, 2);
