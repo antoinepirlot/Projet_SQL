@@ -792,15 +792,15 @@ FROM project_sql.etudiants e,
      project_sql.ues ue
 WHERE ((ue.bloc = 1
         AND (SELECT e2.nombre_de_credits_valides
-                 FROM project_sql.etudiants e2
-                 WHERE e2.id_etudiant = e.id_etudiant) < 30)
+             FROM project_sql.etudiants e2
+             WHERE e2.id_etudiant = e.id_etudiant) < 30)
         OR ((SELECT e2.nombre_de_credits_valides
-            FROM project_sql.etudiants e2
-            WHERE e2.id_etudiant = e.id_etudiant) >= 30
+             FROM project_sql.etudiants e2
+             WHERE e2.id_etudiant = e.id_etudiant) >= 30
                AND project_sql.a_valider_les_ues_prerequises(ue.id_ue, e.id_etudiant)))
-        AND ue.id_ue NOT IN (SELECT uv.id_ue
-                             FROM project_sql.ues_validees uv
-                             WHERE uv.id_etudiant = e.id_etudiant);
+  AND ue.id_ue NOT IN (SELECT uv.id_ue
+                       FROM project_sql.ues_validees uv
+                       WHERE uv.id_etudiant = e.id_etudiant);
 
 ---------------------------------------------------------------------
 
