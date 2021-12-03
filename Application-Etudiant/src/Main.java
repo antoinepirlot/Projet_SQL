@@ -14,6 +14,7 @@ public class Main {
 
         //Chargement des variables du fichier conf.properties
         Properties props = new Properties();
+        //TODO Utilise le chemin relatif
         try (FileInputStream fis = new FileInputStream("C:\\Users\\dimit\\IdeaProjects\\Projet_SQL\\Application-Etudiant\\model\\conf.properties")){
             props.load(fis);
         }
