@@ -29,7 +29,7 @@ CREATE TABLE project_sql.ues
     id_ue             SERIAL PRIMARY KEY,
     code_ue           VARCHAR(15) NOT NULL UNIQUE CHECK ( upper(code_ue) LIKE 'BINV1%' OR upper(code_ue) LIKE 'BINV2%' OR upper(code_ue) LIKE 'BINV3%'),
     nom               VARCHAR(50) NOT NULL,
-    bloc              INT         NOT NULL,
+    bloc              INT         NOT NULL CHECK (bloc = 1 OR bloc = 2 OR bloc = 3),
     nombre_de_credits INT         NOT NULL CHECK ( nombre_de_credits > 0 ),
     nombre_d_inscrits INT         NOT NULL DEFAULT 0 CHECK (nombre_d_inscrits >= 0)
 );
@@ -297,10 +297,10 @@ BEGIN
     GROUP BY id_etudiant
     INTO _etudiant;
 
-    IF NOT EXISTS(SELECT id_etudiant
-                  FROM project_sql.etudiants
-                  WHERE email = _email
-        ) THEN
+    IF NOT EXISTS (SELECT id_etudiant
+                   FROM project_sql.etudiants
+                   WHERE email = _email
+                   ) THEN
         RAISE 'L''étudiant n''existe pas' ;
     end if;
 
@@ -504,7 +504,7 @@ BEGIN
         RAISE 'Impossible de supprimer une ue d''''un pae déjà validé';
     END IF;
 
-    SELECT nombre_de_credits
+    SELECT nombre_de_credits, id_ue
     FROM project_sql.ues
     WHERE id_ue = OLD.id_ue
     INTO _ue;
@@ -747,6 +747,14 @@ FROM project_sql.etudiants e,
      project_sql.paes p
 WHERE e.id_etudiant = p.id_etudiant
   AND p.valide IS FALSE;
+
+---------------------------------------------------------------------
+CREATE OR REPLACE VIEW project_sql.visualiser_ue_disponible_pae AS
+    SELECT ue.code_ue , ue.nom, ue.nombre_de_credits, ue.bloc, e.email as "email"
+    FROM project_sql.ues ue, project_sql.etudiants e
+    WHERE ue.id_ue NOT IN (SELECT ue_validee.id_ue FROM project_sql.ues_validees ue_validee, project_sql.etudiants e WHERE  e.id_etudiant = ue_validee.id_etudiant)
+    AND ue.id_ue NOT IN (SELECT ue_pae.id_ue FROM project_sql.ues_pae ue_pae , project_sql.etudiants e, project_sql.paes pae WHERE ue_pae.code_pae = pae.code_pae AND e.id_etudiant = pae.id_etudiant)
+    ORDER BY ue.code_ue;
 
 ---------------------------------------------------------------------
 
