@@ -789,5 +789,5 @@ GRANT CONNECT ON DATABASE dbantoinepirlot TO nicolasdimitriadis;
 GRANT USAGE ON SCHEMA project_sql TO nicolasdimitriadis;
 GRANT SELECT ON TABLE project_sql.etudiants, project_sql.ues, project_sql.ues_pae, project_sql.paes, project_sql.ues_validees, project_sql.prerequis TO nicolasdimitriadis;
 GRANT INSERT ON TABLE project_sql.ues_pae TO nicolasdimitriadis;
-GRANT UPDATE ON TABLE project_sql.paes TO nicolasdimitriadis;
+GRANT UPDATE ON TABLE project_sql.ues, project_sql.paes TO nicolasdimitriadis;
 GRANT DELETE ON TABLE project_sql.ues_pae TO nicolasdimitriadis;
