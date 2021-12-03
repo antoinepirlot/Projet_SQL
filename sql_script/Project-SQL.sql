@@ -479,7 +479,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_augmenter_nombre_de_credits_pae
-    AFTER INSERT
+    BEFORE INSERT
     ON project_sql.ues_pae
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.augmenter_nombre_de_credits_pae();
