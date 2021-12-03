@@ -234,7 +234,7 @@ public class Main {
             System.exit(1);
         }
 
-        String url = "jdbc:postgresql://172.26.4.2:5432/dbantoinepirlot";
+        String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(url, "antoinepirlot", "at5BER69h");
