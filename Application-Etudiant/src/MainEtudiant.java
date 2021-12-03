@@ -1,48 +1,11 @@
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.*;
-import java.util.Properties;
 import java.util.Scanner;
 
 public class MainEtudiant {
     private String emailEtudiant;
-    private Connection conn = null;
     private boolean connecte = false;
     private static final Scanner scanner = new Scanner(System.in);
-
-    public MainEtudiant(){
-        //Chargement des variables du fichier conf.properties
-        Properties props = new Properties();
-        try (FileInputStream fis = new FileInputStream("C:\\Users\\dimit\\IdeaProjects\\Projet_SQL\\Application-Etudiant\\model\\conf.properties")){
-            props.load(fis);
-        } catch (FileNotFoundException e ) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        String classe = props.getProperty("jdbc.driver.class");
-        String url = props.getProperty("jdbc.url");
-        String login = props.getProperty("jdbc.login");
-        String password = props.getProperty("jdbc.password");
-
-        //Forcer le chargement du Driver à l'exécution
-        try {
-            Class.forName(classe);
-        } catch (ClassNotFoundException e) {
-            System.out.println("Driver PostgreSQL manquant");
-            System.exit(1);
-        }
-
-        try {
-            conn= DriverManager.getConnection(url, login, password);
-        } catch ( SQLException e) {
-            System.out.println("Impossible de joindre le server");
-            System.exit(1);
-        }
-    }
+    private static final Connection connexion = connexionDb();;
 
     public String menu() {
         return "1 -> Ajouter une UE au PAE.\n"
@@ -56,7 +19,7 @@ public class MainEtudiant {
 
     public void exit() {
         try{
-            conn.close();
+            connexion.close();
             System.out.println("Merci d'avoir utilisee notre application de gestion d'un PAE!");
         } catch (SQLException e) {
             System.out.println("Erreur lors de la fermeture de la connection a la DB.");
@@ -69,7 +32,7 @@ public class MainEtudiant {
         try {
             System.out.println("Indique ton adresse email :");
             emailEtudiant =scanner.next();
-            PreparedStatement ps = conn.prepareStatement("SELECT * FROM project_sql.connexion_etudiant(?)");
+            PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.connexion_etudiant(?)");
             ps.setString(1, emailEtudiant);
 
             try(ResultSet rs = ps.executeQuery()){
@@ -98,7 +61,7 @@ public class MainEtudiant {
             System.out.println("Veuillez entrez le code de l'UE que vous souhaiter ajouter a votre PAE");
             String code_ue = scanner.next();
             try {
-                PreparedStatement ps = conn.prepareStatement("SELECT * FROM project_sql.ajouter_ue_pae(?,?)");
+                PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.ajouter_ue_pae(?,?)");
                 ps.setString(1, emailEtudiant);
                 ps.setString(2,code_ue);
 
@@ -126,7 +89,7 @@ public class MainEtudiant {
             String code_ue = scanner.next();
             try {
 
-                PreparedStatement ps = conn.prepareStatement("SELECT * FROM project_sql.enlever_ue_pae(?,?)");
+                PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.enlever_ue_pae(?,?)");
                 ps.setString(1, emailEtudiant);
                 ps.setString(2, code_ue);
                 try (ResultSet rs = ps.executeQuery()){
@@ -152,7 +115,7 @@ public class MainEtudiant {
 
         if(connecte){
             try {
-                PreparedStatement ps = conn.prepareStatement("SELECT * FROM project_sql.valider_pae(?)");
+                PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.valider_pae(?)");
                 ps.setString(1, emailEtudiant);
 
                 try (ResultSet rs = ps.executeQuery()){
@@ -175,7 +138,7 @@ public class MainEtudiant {
     public void afficherUesAutorisees(){
         if (connecte){
             try {
-                PreparedStatement ps = conn.prepareStatement("SELECT * FROM project_sql.visualiser_ue_disponible_pae WHERE email = ?");
+                PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.visualiser_ue_disponible_pae WHERE email = ?");
                 ps.setString(1, emailEtudiant);
 
                 try (ResultSet rs = ps.executeQuery()){
@@ -202,7 +165,7 @@ public class MainEtudiant {
 
         if(connecte){
             try {
-                PreparedStatement ps = conn.prepareStatement("SELECT * FROM project_sql.visualiser_pae WHERE email = ?");
+                PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.visualiser_pae WHERE email = ?");
                 ps.setString(1, emailEtudiant);
 
                 try (ResultSet rs = ps.executeQuery()){
@@ -231,7 +194,7 @@ public class MainEtudiant {
         //TODO à voir si le nom doit changer ou pas (de la fonction)
         if(connecte){
             try {
-                PreparedStatement ps = conn.prepareStatement("SELECT * FROM project_sql.reinitialiser_pae(?)");
+                PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.reinitialiser_pae(?)");
                 ps.setString(1, emailEtudiant);
 
                 try (ResultSet rs = ps.executeQuery()){
@@ -250,7 +213,22 @@ public class MainEtudiant {
 
     }
 
+    private static Connection connexionDb() {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Driver PostgeSQL manquant!");
+            System.exit(1);
+        }
 
-
-
+        String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
+        Connection connection = null;
+        try {
+            connection = DriverManager.getConnection(url, "nicolasdimitriadis", "0JE9SRO2G");
+        } catch (SQLException e) {
+            System.out.println("Impossible de joindre le server !");
+            System.exit(1);
+        }
+        return connection;
+    }
 }
