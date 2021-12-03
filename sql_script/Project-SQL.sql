@@ -423,6 +423,7 @@ DECLARE
     _ue              RECORD;
     _ue_prerequise   RECORD;
 BEGIN
+    -- todo CHECK IF OLD OR NEW
     SELECT p.id_etudiant, p.valide, e.nombre_de_credits_valides
     FROM project_sql.paes p,
          project_sql.etudiants e
