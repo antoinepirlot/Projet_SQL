@@ -787,4 +787,4 @@ ORDER BY p.nombre_de_credits_total;
 
 GRANT CONNECT ON DATABASE dbantoinepirlot TO nicolasdimitriadis;
 GRANT USAGE ON SCHEMA project_sql TO nicolasdimitriadis;
-GRANT SELECT ON TABLE etudiants TO nicolasdimitriadis;
+GRANT SELECT ON TABLE project_sql.etudiants TO nicolasdimitriadis;
