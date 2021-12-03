@@ -27,8 +27,29 @@ public class MainEtudiant {
     }
 
 
-    public void connexion() {
-        String mdpDB ="";
+    public void connexionEtudiant() {
+        System.out.println("Entre ton email");
+        String email = scanner.next();
+
+        System.out.println("Entre ton mot de passe");
+        String mdp = scanner.next();
+
+        try{
+            PreparedStatement ps = connexion.prepareStatement("SELECT email FROM project_sql.etudiants WHERE email = ? AND mot_de_passe = ?");
+            ps.setString(1, email);
+            ps.setString(2, mdp);
+            try (ResultSet rs = ps.executeQuery()){
+                if(!rs.next()) {
+                    System.out.println("Email ou mot de passe invalide.");
+                    System.exit(1);
+                }else{
+                    System.out.println("Bon email et bon mot de passe");
+                }
+            }
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+        /*String mdpDB ="";
         try {
             System.out.println("Indique ton adresse email :");
             emailEtudiant =scanner.next();
@@ -47,13 +68,13 @@ public class MainEtudiant {
                 System.out.println("L'etudiant est connecte");
             }else {
                 System.out.println("Le mot de passe est faux");
-                connexion();
+                connexionEtudiant();
 
             }
         }catch(SQLException e) {
             System.out.println("Erreur");
             System.out.println(e.getMessage());
-        }
+        }*/
     }
 
     public void ajouterUePae(){
@@ -77,7 +98,7 @@ public class MainEtudiant {
         }
         else{
             System.out.println("L'etudiant n'est pas connecte");
-            connexion();
+            connexionEtudiant();
         }
 
     }
@@ -105,7 +126,7 @@ public class MainEtudiant {
         }
         else{
             System.out.println("L'etudiant n'est pas connecte");
-            connexion();
+            connexionEtudiant();
         }
 
     }
@@ -130,7 +151,7 @@ public class MainEtudiant {
         }
         else{
             System.out.println("L'etudiant n'est pas connecte");
-            connexion();
+            connexionEtudiant();
         }
 
     }
@@ -157,7 +178,7 @@ public class MainEtudiant {
         }
         else {
             System.out.println("L'etudiant n'est pas connecte");
-            connexion();
+            connexionEtudiant();
         }
     }
 
@@ -184,7 +205,7 @@ public class MainEtudiant {
         }
         else {
             System.out.println("L'etudiant n'est pas connecte");
-            connexion();
+            connexionEtudiant();
         }
 
 
@@ -208,7 +229,7 @@ public class MainEtudiant {
         }
         else {
             System.out.println("L'etudiant n'est pas connecte");
-            connexion();
+            connexionEtudiant();
         }
 
     }

@@ -6,7 +6,7 @@ public class ApplicationEtudiant {
 
     public static void main(String[] args){
         boolean boucle =  true ;
-        app.connexion();
+        app.connexionEtudiant();
         while(boucle) {
             System.out.println(app.menu());
             int choix = scanner.nextInt();
