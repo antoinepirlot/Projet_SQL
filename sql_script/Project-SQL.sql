@@ -566,9 +566,11 @@ $$
 DECLARE
     _ue            RECORD;
     _ue_prerequise RECORD;
+    _etudiant      RECORD;
 BEGIN
     SELECT id_ue,
-           nombre_de_credits
+           nombre_de_credits,
+           bloc
     FROM project_sql.ues
     WHERE id_ue = NEW.id_ue
     INTO _ue;
@@ -580,6 +582,11 @@ BEGIN
     GROUP BY id_ue_prerequise
     INTO _ue_prerequise;
 
+    SELECT nombre_de_credits_valides
+    FROM project_sql.etudiants
+    WHERE id_etudiant = NEW.id_etudiant
+    INTO _etudiant;
+
     -- Si il y a une ue prérequise et qu''elle n''est pas validée, alors on ne peut pas valider cette ue.
     IF _ue_prerequise.nombre_de_prerequis <> 0
         AND (SELECT COUNT(*)
@@ -588,6 +595,10 @@ BEGIN
                AND id_etudiant = NEW.id_etudiant) = 0 THEN
 
         RAISE 'L''''étudiant n''''a pas validé le prérequis de ce cours.';
+    END IF;
+
+    IF _etudiant.nombre_de_credits_valides < 30 AND _ue.bloc <> 1 THEN
+        RAISE 'L''étudiant n''a pas validé assez de crédit';
     END IF;
 
     UPDATE project_sql.etudiants
