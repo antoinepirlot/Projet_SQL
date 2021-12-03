@@ -1,4 +1,3 @@
-import com.berry.BCrypt;
 import java.sql.*;
 import java.util.Scanner;
 
@@ -6,7 +5,6 @@ public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
     private static final Connection connexion = connexionDb();
-
     public static void main(String[] args) {
         System.out.println("Bienvenue dans l'application centrale dédiée aux administrateurs.");
 
