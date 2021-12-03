@@ -23,7 +23,7 @@ public class Main {
         String login = props.getProperty("jdbc.login");
         String password = props.getProperty("jdbc.password");
 
-        //Forcer le chargement du Driver à l'exécution
+        //Forcer le chargement du Driver Ã  l'exÃ©cution
         try {
             Class.forName(classe);
         } catch (ClassNotFoundException e) {
@@ -42,12 +42,12 @@ public class Main {
         }
 
 
-        System.out.println("Bienvenue dans l'application dédiées aux étudiants.");
+        System.out.println("Bienvenue dans l'application dÃ©diÃ©es aux Ã©tudiants.");
         System.out.println();
 
         int choix;
 
-        //Connexion de l'étudiant
+        //Connexion de l'Ã©tudiant
         System.out.println("Veuillez introduire votre adresse email : ");
         String emailEtudiant = scanner.next();
         System.out.println("Veuillez introduire votre mot de passe : ");
@@ -70,9 +70,9 @@ public class Main {
             System.out.println("1 -> Ajouter une UE au PAE");
             System.out.println("2 -> Enlever une UE du PAE");
             System.out.println("3 -> Valider le PAE");
-            System.out.println("4 -> Afficher les UE autorisées à l'ajout");
+            System.out.println("4 -> Afficher les UE autorisÃ©es Ã  l'ajout");
             System.out.println("5 -> Visualiser le PAE");
-            System.out.println("6 -> Réinitialiser le PAE");
+            System.out.println("6 -> RÃ©initialiser le PAE");
 
             choix = scanner.nextInt();
             switch (choix) {
@@ -95,7 +95,7 @@ public class Main {
                     reinitialiserPae(conn, emailEtudiant);
                     break;
                 default:
-                    System.out.println("Fin du programme. Bonne journée.");
+                    System.out.println("Fin du programme. Bonne journÃ©e.");
                     System.out.println();
                     break;
             }
@@ -123,7 +123,7 @@ public class Main {
             e.printStackTrace();
             e.getMessage();
         }
-        System.out.println("Vous êtes connecté à l'email : " + emailEtudiant);
+        System.out.println("Vous Ãªtes connectÃ© Ã  l'email : " + emailEtudiant);
         return true;
 
     }
@@ -131,7 +131,7 @@ public class Main {
 
     public static void ajouterUePae(Connection conn, String emailEtudiant){
         //TODO
-        System.out.println("Veuillez entrez le code de l'UE que vous souhaiter ajouter à votre PAE");
+        System.out.println("Veuillez entrez le code de l'UE que vous souhaiter ajouter Ã  votre PAE");
         String code_ue = scanner.next();
         try {
 
@@ -141,7 +141,7 @@ public class Main {
 
             try (ResultSet rs = ps.executeQuery()){
                 while (rs.next()){
-                    System.out.println("L'UE "+ code_ue + " a correctement été ajoutée à votre PAE");
+                    System.out.println("L'UE "+ code_ue + " a correctement Ã©tÃ© ajoutÃ©e Ã  votre PAE");
                 }
             }
         } catch (SQLException e) {
@@ -151,7 +151,7 @@ public class Main {
 
     public static void enleverUePae(Connection conn, String emailEtudiant){
         //TODO
-        System.out.println("Veuillez entrez le code de l'UE que vous souhaiter enlever à votre PAE");
+        System.out.println("Veuillez entrez le code de l'UE que vous souhaiter enlever Ã  votre PAE");
         String code_ue = scanner.next();
         try {
 
@@ -160,7 +160,7 @@ public class Main {
             ps.setString(2, code_ue);
             try (ResultSet rs = ps.executeQuery()){
                 while (rs.next()) {
-                    System.out.println("L'UE " + code_ue + " a correctement été enlevée de votre PAE");
+                    System.out.println("L'UE " + code_ue + " a correctement Ã©tÃ© enlevÃ©e de votre PAE");
 
                 }
             }
@@ -178,7 +178,7 @@ public class Main {
 
             try (ResultSet rs = ps.executeQuery()){
                 while (rs.next()){
-                    System.out.println("Votre PAE a bien été validé");
+                    System.out.println("Votre PAE a bien Ã©tÃ© validÃ©");
                 }
             }
         } catch (SQLException e) {
@@ -210,14 +210,14 @@ public class Main {
     }
 
     public static void reinitialiserPae(Connection conn, String emailEtudiant){
-        //TODO à voir si le nom doit changer ou pas (de la fonction)
+        //TODO Ã  voir si le nom doit changer ou pas (de la fonction)
         try {
             PreparedStatement ps = conn.prepareStatement("SELECT * FROM project_sql.reinitialiser_pae(?)");
             ps.setString(1, emailEtudiant);
 
             try (ResultSet rs = ps.executeQuery()){
                 while (rs.next()){
-                    System.out.println("Le PAE a été correctement réinitialisé");
+                    System.out.println("Le PAE a Ã©tÃ© correctement rÃ©initialisÃ©");
                 }
             }
         } catch (SQLException e) {
