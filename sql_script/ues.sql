@@ -35,6 +35,6 @@ INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombr
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (31, 'BINV3150-1-1', 'Développement Web: questions spéciales', 3, 3, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (32, 'BINV3190-1', 'Projet de fin d''études', 3, 5, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (33, 'BINV3080-1', 'Intégration en milieu professionnel', 3, 30, 0);
-INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (34, 'BINV-3090-1', 'Développement à l''aide d''un moteur de jeux, Unity', 3, 4, 0);
+INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (34, 'BINV3090-1', 'Développement à l''aide d''un moteur de jeux, Unity', 3, 4, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (35, 'BINV3100-2', 'Intelligence Artificielle, Machine Learning', 3, 4, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (36, 'BINV3120-1', 'Progiciel de gestion intégré', 3, 4, 0);
