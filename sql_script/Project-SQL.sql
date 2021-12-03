@@ -296,10 +296,10 @@ BEGIN
     GROUP BY id_etudiant
     INTO _etudiant;
 
-    IF NOT EXISTS (SELECT id_etudiant
-                   FROM project_sql.etudiants
-                   WHERE email = _email
-                   ) THEN
+    IF NOT EXISTS(SELECT id_etudiant
+                  FROM project_sql.etudiants
+                  WHERE email = _email
+        ) THEN
         RAISE 'L''étudiant n''existe pas' ;
     end if;
 
@@ -324,7 +324,8 @@ DECLARE
 BEGIN
     FOR _ue_prerequise IN (SELECT id_ue_prerequise
                            FROM project_sql.prerequis
-                           WHERE id_ue = _id_ue) LOOP
+                           WHERE id_ue = _id_ue)
+        LOOP
             IF _ue_prerequise.id_ue_prerequise NOT IN (SELECT id_ue
                                                        FROM project_sql.ues_validees
                                                        WHERE id_etudiant = _id_etudiant) THEN
@@ -783,21 +784,21 @@ WHERE e.id_etudiant = p.id_etudiant
 ---------------------------------------------------------------------
 
 CREATE OR REPLACE VIEW project_sql.visualiser_ue_disponible_pae AS
-SELECT  ue.code_ue,
-        ue.nom,
-        ue.nombre_de_credits,
-        ue.bloc,
-        e.email AS "email"
+SELECT ue.code_ue,
+       ue.nom,
+       ue.nombre_de_credits,
+       ue.bloc,
+       e.email AS "email"
 FROM project_sql.etudiants e,
      project_sql.ues ue
 WHERE ((ue.bloc = 1
-        AND (SELECT e2.nombre_de_credits_valides
-             FROM project_sql.etudiants e2
-             WHERE e2.id_etudiant = e.id_etudiant) < 30)
-        OR ((SELECT e2.nombre_de_credits_valides
-             FROM project_sql.etudiants e2
-             WHERE e2.id_etudiant = e.id_etudiant) >= 30
-               AND project_sql.a_valider_les_ues_prerequises(ue.id_ue, e.id_etudiant)))
+    AND (SELECT e2.nombre_de_credits_valides
+         FROM project_sql.etudiants e2
+         WHERE e2.id_etudiant = e.id_etudiant) < 30)
+    OR ((SELECT e2.nombre_de_credits_valides
+         FROM project_sql.etudiants e2
+         WHERE e2.id_etudiant = e.id_etudiant) >= 30
+        AND project_sql.a_valider_les_ues_prerequises(ue.id_ue, e.id_etudiant)))
   AND ue.id_ue NOT IN (SELECT uv.id_ue
                        FROM project_sql.ues_validees uv
                        WHERE uv.id_etudiant = e.id_etudiant);
@@ -812,6 +813,8 @@ SELECT code_ue           AS "code_ue",
 FROM project_sql.ues
 ORDER BY nombre_d_inscrits;
 
+---------------------------------------------------------------------
+
 CREATE OR REPLACE VIEW project_sql.visualiser_tous_les_etudiants AS
 SELECT DISTINCT e.nom                     AS "nom",
                 e.prenom                  AS "prenom",
@@ -821,9 +824,42 @@ FROM project_sql.etudiants e,
      project_sql.paes p
 ORDER BY p.nombre_de_credits_total;
 
-GRANT CONNECT ON DATABASE dbantoinepirlot TO nicolasdimitriadis;
-GRANT USAGE ON SCHEMA project_sql TO nicolasdimitriadis;
-GRANT SELECT ON TABLE project_sql.etudiants, project_sql.ues, project_sql.ues_pae, project_sql.paes, project_sql.ues_validees, project_sql.prerequis, project_sql.visualiser_pae TO nicolasdimitriadis;
-GRANT INSERT ON TABLE project_sql.ues_pae TO nicolasdimitriadis;
-GRANT UPDATE ON TABLE project_sql.ues, project_sql.paes, project_sql.etudiants TO nicolasdimitriadis;
-GRANT DELETE ON TABLE project_sql.ues_pae TO nicolasdimitriadis;
+---------------------------------------------------------------------------
+-------------------------------GRANTS--------------------------------------
+---------------------------------------------------------------------------
+
+GRANT CONNECT ON DATABASE
+    dbantoinepirlot TO nicolasdimitriadis;
+
+---------------------------------------------------------------------
+
+GRANT USAGE ON SCHEMA
+    project_sql TO nicolasdimitriadis;
+
+---------------------------------------------------------------------
+
+GRANT SELECT ON TABLE
+    project_sql.etudiants,
+    project_sql.ues,
+    project_sql.ues_pae,
+    project_sql.paes,
+    project_sql.ues_validees,
+    project_sql.prerequis,
+    project_sql.visualiser_pae TO nicolasdimitriadis;
+
+---------------------------------------------------------------------
+
+GRANT INSERT ON TABLE
+    project_sql.ues_pae TO nicolasdimitriadis;
+
+---------------------------------------------------------------------
+
+GRANT UPDATE ON TABLE
+    project_sql.ues,
+    project_sql.paes,
+    project_sql.etudiants TO nicolasdimitriadis;
+
+---------------------------------------------------------------------
+
+GRANT DELETE ON TABLE
+    project_sql.ues_pae TO nicolasdimitriadis;
