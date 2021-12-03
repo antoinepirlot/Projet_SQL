@@ -285,7 +285,7 @@ $$ LANGUAGE plpgsql;
 /**
   Connexion d''un étudiant
  */
-CREATE OR REPLACE FUNCTION project_sql.connexion_etudiant(_email VARCHAR(150)) RETURNS SETOF CHAR(60) AS
+CREATE OR REPLACE FUNCTION project_sql.connexion_etudiant(_email VARCHAR(150), _mot_de_passe CHAR(60)) RETURNS SETOF CHAR(60) AS
 $$
 DECLARE
     _etudiant RECORD;

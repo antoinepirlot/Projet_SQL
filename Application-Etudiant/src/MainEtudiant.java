@@ -31,13 +31,13 @@ public class MainEtudiant {
         System.out.println("Entre ton email");
         String email = scanner.next();
 
-        System.out.println("Entre ton mot de passe");
-        String mdp = scanner.next();
+        /*System.out.println("Entre ton mot de passe");
+        String mdp = scanner.next();*/
 
         try{
-            PreparedStatement ps = connexion.prepareStatement("SELECT email FROM project_sql.etudiants WHERE email = ? AND mot_de_passe = ?");
+            PreparedStatement ps = connexion.prepareStatement("SELECT email FROM project_sql.etudiants WHERE email = ?");
             ps.setString(1, email);
-            ps.setString(2, mdp);
+            //ps.setString(2, mdp);
             try (ResultSet rs = ps.executeQuery()){
                 if(!rs.next()) {
                     System.out.println("Email ou mot de passe invalide.");
