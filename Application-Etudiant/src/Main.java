@@ -1,5 +1,3 @@
-import com.berry.BCrypt;
-
 import java.io.FileInputStream;
 import java.sql.*;
 import java.util.Properties;
