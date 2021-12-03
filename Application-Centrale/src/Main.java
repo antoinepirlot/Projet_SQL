@@ -234,10 +234,10 @@ public class Main {
             System.exit(1);
         }
 
-        String url = "jdbc:postgresql://127.0.0.1:5432/postgres";
+        String url = "jdbc:postgresql://172.26.4.2:5432/dbantoinepirlot";
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(url, "postgres", "06192000");
+            connection = DriverManager.getConnection(url, "antoinepirlot", "at5BER69h");
         } catch (SQLException e) {
             System.out.println("Impossible de joindre le server !");
             System.exit(1);
