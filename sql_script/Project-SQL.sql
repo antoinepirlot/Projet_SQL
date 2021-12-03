@@ -290,7 +290,6 @@ $$
 DECLARE
     _etudiant RECORD;
 BEGIN
-
     SELECT id_etudiant, COUNT(*) AS "count"
     FROM project_sql.etudiants
     WHERE email = _email
@@ -785,3 +784,7 @@ SELECT DISTINCT e.nom                     AS "nom",
 FROM project_sql.etudiants e,
      project_sql.paes p
 ORDER BY p.nombre_de_credits_total;
+
+GRANT CONNECT ON DATABASE dbantoinepirlot TO nicolasdimitriadis;
+GRANT USAGE ON SCHEMA project_sql TO nicolasdimitriadis;
+GRANT SELECT ON TABLE etudiants TO nicolasdimitriadis;
