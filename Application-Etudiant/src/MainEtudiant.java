@@ -28,28 +28,7 @@ public class MainEtudiant {
 
 
     public void connexionEtudiant() {
-        System.out.println("Entre ton email");
-        String email = scanner.next();
-
-        /*System.out.println("Entre ton mot de passe");
-        String mdp = scanner.next();*/
-
-        try{
-            PreparedStatement ps = connexion.prepareStatement("SELECT email FROM project_sql.etudiants WHERE email = ?");
-            ps.setString(1, email);
-            //ps.setString(2, mdp);
-            try (ResultSet rs = ps.executeQuery()){
-                if(!rs.next()) {
-                    System.out.println("Email ou mot de passe invalide.");
-                    System.exit(1);
-                }else{
-                    System.out.println("Bon email et bon mot de passe");
-                }
-            }
-        } catch (SQLException e){
-            System.out.println(e.getMessage());
-        }
-        /*String mdpDB ="";
+        String mdpDB ="";
         try {
             System.out.println("Indique ton adresse email :");
             emailEtudiant =scanner.next();
@@ -74,7 +53,7 @@ public class MainEtudiant {
         }catch(SQLException e) {
             System.out.println("Erreur");
             System.out.println(e.getMessage());
-        }*/
+        }
     }
 
     public void ajouterUePae(){
