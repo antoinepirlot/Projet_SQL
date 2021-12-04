@@ -662,7 +662,7 @@ BEGIN
     INTO _etudiant_et_pae;
 
     -- Verifie que le pae n''est pas déjà validé
-    IF _etudiant_et_pae.valide = 1 THEN
+    IF _etudiant_et_pae.valide IS TRUE THEN
         RAISE 'PAE déjà validé';
     END IF;
 
@@ -710,7 +710,7 @@ $$ LANGUAGE plpgsql;
 --TRIGGER
 -- Après la validation du pae de l''étudiant
 CREATE TRIGGER trigger_determiner_bloc_etudiant
-    AFTER UPDATE
+    BEFORE UPDATE
         OF valide
     ON project_sql.paes
     FOR EACH ROW
