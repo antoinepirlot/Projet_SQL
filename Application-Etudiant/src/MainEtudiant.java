@@ -41,14 +41,15 @@ public class MainEtudiant {
                     mdpDB = rs.getString(1);
                 }
             }
+            if (BCrypt.checkpw(mdp, mdpDB))
+                System.out.println("L'etudiant est connecte");
+            else {
+                System.out.println("Le mot de passe est faux");
+                connexionEtudiant();
+            }
         } catch (SQLException e) {
             System.out.println("Erreur");
             System.out.println(e.getMessage());
-        }
-        if (BCrypt.checkpw(mdp, mdpDB))
-            System.out.println("L'etudiant est connecte");
-        else {
-            System.out.println("Le mot de passe est faux");
             connexionEtudiant();
         }
     }
