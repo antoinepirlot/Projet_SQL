@@ -224,6 +224,13 @@ BEGIN
     WHERE code_ue = _code_ue
     INTO _ue;
 
+    --Cette vérification ne fonctionne pas dans le trigger
+    IF _ue.id_ue NOT IN (SELECT id_ue
+                         FROM project_sql.ues_pae
+                         WHERE code_pae = _pae.code_pae) THEN
+        RAISE 'L''ue n''est pas présente dans le pae.';
+    END IF;
+
     DELETE
     FROM project_sql.ues_pae
     WHERE code_pae = _pae.code_pae
@@ -493,14 +500,7 @@ DECLARE
     _ue  RECORD;
     _pae RECORD;
 BEGIN
-
-    IF OLD.id_ue NOT IN (SELECT id_ue
-                         FROM project_sql.ues_pae
-                         WHERE code_pae = OLD.code_pae) THEN
-        RAISE 'L''ue n''est pas présente dans le pae.';
-    END IF;
-
-    SELECT p.code_pae, p.id_etudiant, p.valide
+    SELECT p.valide
     FROM project_sql.paes p,
          project_sql.etudiants e
     WHERE p.id_etudiant = e.id_etudiant
@@ -511,15 +511,15 @@ BEGIN
         RAISE 'Impossible de supprimer une ue d''un pae déjà validé';
     END IF;
 
-    SELECT nombre_de_credits, id_ue
-    FROM project_sql.ues
+    SELECT nombre_de_credits
+    FROM project_sql.ues ue
     WHERE id_ue = OLD.id_ue
     INTO _ue;
 
     --Diminue le nombre de crédits dans le pae
     UPDATE project_sql.paes
     SET nombre_de_credits_total = nombre_de_credits_total - _ue.nombre_de_credits
-    WHERE code_pae = _pae.code_pae;
+    WHERE code_pae = OLD.code_pae;
 
     RETURN OLD;
 END
