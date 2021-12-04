@@ -28,7 +28,7 @@ CREATE TABLE project_sql.ues
 (
     id_ue             SERIAL PRIMARY KEY,
     code_ue           VARCHAR(15) NOT NULL UNIQUE CHECK ( code_ue LIKE 'BINV1%' OR code_ue LIKE 'BINV2%' OR code_ue LIKE 'BINV3%'),
-    nom               VARCHAR(50) NOT NULL,
+    nom               VARCHAR(150) NOT NULL,
     bloc              INT         NOT NULL CHECK (bloc = 1 OR bloc = 2 OR bloc = 3),
     nombre_de_credits INT         NOT NULL CHECK ( nombre_de_credits > 0 ),
     nombre_d_inscrits INT         NOT NULL DEFAULT 0 CHECK (nombre_d_inscrits >= 0)
@@ -78,6 +78,8 @@ CREATE TABLE project_sql.ues_pae
 
 /**
   Ajoute une ue dans la table ues
+  On ne sait pas pourquoi mais il faut relancer le script une deuxième fois à cause du bug:
+  unterminated dollar-quoted string at or near "$$[...]" POSITION: 184
  */
 CREATE OR REPLACE FUNCTION project_sql.ajouter_ue(_code_ue VARCHAR(15), _nom VARCHAR(150),
                                                   _nombre_de_credits INT) RETURNS VOID AS
