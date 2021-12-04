@@ -796,8 +796,8 @@ WHERE (ue.id_ue NOT IN (SELECT up.id_ue
     AND ue.id_ue NOT IN (SELECT uv.id_ue
                          FROM project_sql.ues_validees uv
                          WHERE uv.id_etudiant = e.id_etudiant))
-   AND ((e.nombre_de_credits_valides >= 30 AND project_sql.a_valider_les_ues_prerequises(ue.id_ue, e.id_etudiant))
-     OR (e.nombre_de_credits_valides < 30
+   AND ((e.nombre_de_credits_valides >= 45 AND project_sql.a_valider_les_ues_prerequises(ue.id_ue, e.id_etudiant))
+     OR (e.nombre_de_credits_valides < 45
          AND ue.bloc = 1));
 
 ---------------------------------------------------------------------
