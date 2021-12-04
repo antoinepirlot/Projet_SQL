@@ -27,15 +27,15 @@ CREATE TABLE project_sql.etudiants
 CREATE TABLE project_sql.ues
 (
     id_ue             SERIAL PRIMARY KEY,
-    code_ue           VARCHAR(15) NOT NULL UNIQUE CHECK ( code_ue LIKE 'BINV1%'
-                                                          OR code_ue LIKE 'BINV2%'
-                                                          OR code_ue LIKE 'BINV3%'),
+    code_ue           VARCHAR(15)  NOT NULL UNIQUE CHECK ( code_ue LIKE 'BINV1%'
+        OR code_ue LIKE 'BINV2%'
+        OR code_ue LIKE 'BINV3%'),
     nom               VARCHAR(150) NOT NULL,
-    bloc              INT         NOT NULL CHECK ((bloc = 1 AND code_ue LIKE 'BINV1%')
-                                                      OR (bloc = 2 AND code_ue LIKE 'BINV2%')
-                                                      OR (bloc = 3 AND code_ue LIKE 'BINV3%')),
-    nombre_de_credits INT         NOT NULL CHECK ( nombre_de_credits > 0 ),
-    nombre_d_inscrits INT         NOT NULL DEFAULT 0 CHECK (nombre_d_inscrits >= 0)
+    bloc              INT          NOT NULL CHECK ((bloc = 1 AND code_ue LIKE 'BINV1%')
+        OR (bloc = 2 AND code_ue LIKE 'BINV2%')
+        OR (bloc = 3 AND code_ue LIKE 'BINV3%')),
+    nombre_de_credits INT          NOT NULL CHECK ( nombre_de_credits > 0 ),
+    nombre_d_inscrits INT          NOT NULL DEFAULT 0 CHECK (nombre_d_inscrits >= 0)
 );
 
 CREATE TABLE project_sql.prerequis
@@ -52,9 +52,9 @@ CREATE TABLE project_sql.prerequis
 CREATE TABLE project_sql.paes
 (
     code_pae                SERIAL PRIMARY KEY,
-    id_etudiant             INT  NOT NULL UNIQUE,
+    id_etudiant             INT     NOT NULL UNIQUE,
     valide                  BOOLEAN NOT NULL DEFAULT FALSE,
-    nombre_de_credits_total INT  NOT NULL DEFAULT 0 CHECK (nombre_de_credits_total >= 0 ),
+    nombre_de_credits_total INT     NOT NULL DEFAULT 0 CHECK (nombre_de_credits_total >= 0 ),
     FOREIGN KEY (id_etudiant) REFERENCES project_sql.etudiants (id_etudiant)
 );
 
@@ -451,8 +451,8 @@ BEGIN
     END IF;
 
     -- Si l’étudiant a validé moins de 45 ects et que l’UE n’est pas du bloc 1
-    IF _etudiant_et_pae.nombre_de_credits_valides < 45 AND _ue.bloc != 1 THEN
-        RAISE 'L''étudiant a validé moins de 45 crédits et cette ue ne figure pas au bloc 1.';
+    IF _etudiant_et_pae.nombre_de_credits_valides < 30 AND _ue.bloc != 1 THEN
+        RAISE 'L''étudiant a validé moins de 30 crédits et cette ue ne figure pas au bloc 1.';
     END IF;
 
     -- Si l’étudiant n’a pas validé tous les prérequis de cette UE
@@ -476,7 +476,7 @@ BEGIN
     WHERE code_pae = NEW.code_pae;
 
     RETURN NEW;
-END;
+END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_augmenter_nombre_de_credits_pae
@@ -493,6 +493,13 @@ DECLARE
     _ue  RECORD;
     _pae RECORD;
 BEGIN
+
+    IF OLD.id_ue NOT IN (SELECT id_ue
+                         FROM project_sql.ues_pae
+                         WHERE code_pae = OLD.code_pae) THEN
+        RAISE 'L''ue n''est pas présente dans le pae.';
+    END IF;
+
     SELECT p.code_pae, p.id_etudiant, p.valide
     FROM project_sql.paes p,
          project_sql.etudiants e
@@ -515,11 +522,11 @@ BEGIN
     WHERE code_pae = _pae.code_pae;
 
     RETURN OLD;
-END;
+END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_diminuer_nombre_de_credits_pae
-    AFTER DELETE
+    BEFORE DELETE
     ON project_sql.ues_pae
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.diminuer_nombre_de_credits_pae();
@@ -606,7 +613,7 @@ BEGIN
     WHERE id_etudiant = NEW.id_etudiant;
 
     RETURN NEW;
-END;
+END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_augmenter_credits_valides
@@ -628,8 +635,60 @@ DECLARE
 BEGIN
     --SELECT des données que l'on stockes dans des variables
     SELECT p.id_etudiant,
-           p.code_pae,
            p.nombre_de_credits_total,
+           e.nombre_de_credits_valides,
+           e.bloc
+    FROM project_sql.etudiants e,
+         project_sql.paes p
+    WHERE e.id_etudiant = p.id_etudiant
+      AND e.id_etudiant = NEW.id_etudiant
+    INTO _etudiant_et_pae;
+
+    --Mets l'étudiant en bloc 1 si ses crédits validés sont strictement inférieur à 45
+    IF _etudiant_et_pae.nombre_de_credits_valides < 45 THEN
+        UPDATE project_sql.etudiants
+        SET bloc = 1
+        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
+
+        --Mets un etudiant au bloc 3 si la somme de ses crédits en cours et ceux validé sont de 180 ou plus
+    ELSIF _etudiant_et_pae.nombre_de_credits_total + _etudiant_et_pae.nombre_de_credits_valides >= 180 THEN
+        UPDATE project_sql.etudiants
+        SET bloc = 3
+        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
+
+        --Mets l'étudiant en bloc 2 si les 2 conditions ci-dessus n'ont pas été true
+    ELSE
+        UPDATE project_sql.etudiants
+        SET bloc = 2
+        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
+    END IF;
+
+    -- La vérification des crédits dans le pae se fait grâce au trigger_verifier_bloc_validation
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+--TRIGGER
+-- Après la validation du pae de l'étudiant
+CREATE TRIGGER trigger_determiner_bloc_etudiant
+    BEFORE UPDATE
+        OF valide
+    ON project_sql.paes
+    FOR EACH ROW
+EXECUTE PROCEDURE project_sql.determiner_bloc_etudiant();
+
+---------------------------------------------------------------------
+
+/**
+  Vérifie que les crédits du pae de l'étudiant sont suffisant
+ */
+CREATE OR REPLACE FUNCTION project_sql.verifier_bloc_validation() RETURNS TRIGGER AS
+$$
+DECLARE
+    _etudiant_et_pae RECORD;
+BEGIN
+
+    SELECT p.nombre_de_credits_total,
            p.valide,
            e.nombre_de_credits_valides,
            e.bloc
@@ -657,7 +716,7 @@ BEGIN
 
     -- Si l'étudiant est en bloc 2, le nombre de crédit du PAE devra être entre 55 et 74 crédits
     IF (_etudiant_et_pae.nombre_de_credits_total < 55 OR _etudiant_et_pae.nombre_de_credits_total > 74)
-         AND _etudiant_et_pae.bloc = 2 THEN
+        AND _etudiant_et_pae.bloc = 2 THEN
         RAISE 'Impossible de valider le pae, tu dois avoir entre 55 et 74 crédits dans ton pae.';
     END IF;
 
@@ -668,37 +727,16 @@ BEGIN
         RAISE 'Impossible de valider le pae, il doit y avoir au maximum 74 crédits.';
     END IF;
 
-    --Mets l'étudiant en bloc 1 si ses crédits validés sont strictement inférieur à 45
-    IF _etudiant_et_pae.nombre_de_credits_valides < 45 THEN
-    UPDATE project_sql.etudiants
-    SET bloc = 1
-    WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
-
-    --Mets un etudiant au bloc 3 si la somme de ses crédits en cours et ceux validé sont de 180 ou plus
-    ELSIF _etudiant_et_pae.nombre_de_credits_total + _etudiant_et_pae.nombre_de_credits_valides >= 180 THEN
-        UPDATE project_sql.etudiants
-        SET bloc = 3
-        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
-
-        --Mets l'étudiant en bloc 2 si les 2 conditions ci-dessus n'ont pas été true
-    ELSE
-        UPDATE project_sql.etudiants
-        SET bloc = 2
-        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
-    END IF;
-
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
---TRIGGER
--- Après la validation du pae de l'étudiant
-CREATE TRIGGER trigger_determiner_bloc_etudiant
-    BEFORE UPDATE
-        OF valide
-    ON project_sql.paes
+CREATE TRIGGER trigger_verifier_bloc_validation
+    AFTER UPDATE
+        OF bloc
+    ON project_sql.etudiants
     FOR EACH ROW
-EXECUTE PROCEDURE project_sql.determiner_bloc_etudiant();
+EXECUTE PROCEDURE project_sql.verifier_bloc_validation();
 
 ---------------------------------------------------------------------
 
@@ -712,7 +750,6 @@ DECLARE
 BEGIN
     SELECT valide
     FROM project_sql.paes
-         --WHERE code_pae = NEW.code_pae
     WHERE code_pae = OLD.code_pae
     INTO _pae;
 
@@ -725,7 +762,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_verifier_pae_reinitialisation
-    AFTER DELETE
+    BEFORE DELETE
     ON project_sql.ues_pae
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.verifier_pae_reinitialisation();
@@ -801,9 +838,8 @@ WHERE p.id_etudiant = e.id_etudiant
     AND ue.id_ue NOT IN (SELECT uv.id_ue
                          FROM project_sql.ues_validees uv
                          WHERE uv.id_etudiant = e.id_etudiant))
-   AND ((e.nombre_de_credits_valides >= 45 AND project_sql.a_valider_les_ues_prerequises(ue.id_ue, e.id_etudiant))
-     OR (e.nombre_de_credits_valides < 45
-         AND ue.bloc = 1));
+  AND ((e.nombre_de_credits_valides >= 30 AND project_sql.a_valider_les_ues_prerequises(ue.id_ue, e.id_etudiant))
+    OR (e.nombre_de_credits_valides < 30 AND ue.bloc = 1));
 
 ---------------------------------------------------------------------
 
