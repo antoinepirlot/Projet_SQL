@@ -49,7 +49,7 @@ CREATE TABLE project_sql.paes
 (
     code_pae                SERIAL PRIMARY KEY,
     id_etudiant             INT  NOT NULL UNIQUE,
-    valide                  BOOL NOT NULL DEFAULT FALSE,
+    valide                  BOOLEAN NOT NULL DEFAULT FALSE,
     nombre_de_credits_total INT  NOT NULL DEFAULT 0 CHECK (nombre_de_credits_total >= 0 ),
     FOREIGN KEY (id_etudiant) REFERENCES project_sql.etudiants (id_etudiant)
 );
@@ -650,7 +650,11 @@ DECLARE
     _etudiant_et_pae RECORD ;
 BEGIN
     --SELECT des données que l''on stockes dans des variables
-    SELECT e.id_etudiant, p.code_pae, p.nombre_de_credits_total, p.valide, e.nombre_de_credits_valides
+    SELECT p.id_etudiant,
+           p.code_pae,
+           p.nombre_de_credits_total,
+           p.valide,
+           e.nombre_de_credits_valides
     FROM project_sql.etudiants e,
          project_sql.paes p
     WHERE e.id_etudiant = p.id_etudiant
@@ -658,10 +662,10 @@ BEGIN
     INTO _etudiant_et_pae;
 
     -- Verifie que le pae n''est pas déjà validé
-    /*
-    IF _etudiant_et_pae.valide IS TRUE THEN
+    IF _etudiant_et_pae.valide = 1 THEN
         RAISE 'PAE déjà validé';
-    END IF; */
+    END IF;
+
     -- Si la somme des crédits précédemment validés et ceux du PAE atteignent 180, le PAE
     -- ne peut pas dépasser 74 crédits
     IF (_etudiant_et_pae.nombre_de_credits_valides + _etudiant_et_pae.nombre_de_credits_total = 180 AND
@@ -669,10 +673,10 @@ BEGIN
         RAISE 'Impossible de valider le pae, il doit y avoir au maximum 74 crédits.';
     END IF;
 
-    -- Si l’étudiant n’a pas validé au moins 45 crédits dans le passé, alors son PAE ne pourra
+    -- Si l’étudiant n’a pas validé au moins 30 crédits dans le passé, alors son PAE ne pourra
     -- pas dépasser 60 crédits
-    IF (_etudiant_et_pae.nombre_de_credits_valides < 45 AND _etudiant_et_pae.nombre_de_credits_total > 60) THEN
-        RAISE 'Impossible de valider le pae, il doit y avoir maximum 60 crédits car tu as validé moins de 46 crédits';
+    IF (_etudiant_et_pae.nombre_de_credits_valides < 30 AND _etudiant_et_pae.nombre_de_credits_total > 60) THEN
+        RAISE 'Impossible de valider le pae, il doit y avoir maximum 60 crédits car tu as validé moins de 30 crédits';
     END IF;
 
     -- Sinon, le nombre de crédit du PAE devra être entre 55 et 74 crédits
