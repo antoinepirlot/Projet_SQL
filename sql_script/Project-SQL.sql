@@ -27,9 +27,13 @@ CREATE TABLE project_sql.etudiants
 CREATE TABLE project_sql.ues
 (
     id_ue             SERIAL PRIMARY KEY,
-    code_ue           VARCHAR(15) NOT NULL UNIQUE CHECK ( code_ue LIKE 'BINV1%' OR code_ue LIKE 'BINV2%' OR code_ue LIKE 'BINV3%'),
+    code_ue           VARCHAR(15) NOT NULL UNIQUE CHECK ( code_ue LIKE 'BINV1%'
+                                                          OR code_ue LIKE 'BINV2%'
+                                                          OR code_ue LIKE 'BINV3%'),
     nom               VARCHAR(150) NOT NULL,
-    bloc              INT         NOT NULL CHECK (bloc = 1 OR bloc = 2 OR bloc = 3),
+    bloc              INT         NOT NULL CHECK ((bloc = 1 AND code_ue LIKE 'BINV1%')
+                                                      OR (bloc = 2 AND code_ue LIKE 'BINV2%')
+                                                      OR (bloc = 3 AND code_ue LIKE 'BINV3%')),
     nombre_de_credits INT         NOT NULL CHECK ( nombre_de_credits > 0 ),
     nombre_d_inscrits INT         NOT NULL DEFAULT 0 CHECK (nombre_d_inscrits >= 0)
 );
@@ -81,12 +85,12 @@ CREATE TABLE project_sql.ues_pae
   On ne sait pas pourquoi mais il faut relancer le script une deuxième fois à cause du bug:
   unterminated dollar-quoted string at or near "$$[...]" POSITION: 184
  */
-CREATE OR REPLACE FUNCTION project_sql.ajouter_ue(_code_ue VARCHAR(15), _nom VARCHAR(150),
+CREATE OR REPLACE FUNCTION project_sql.ajouter_ue(_code_ue VARCHAR(15), _nom VARCHAR(150), _bloc INT,
                                                   _nombre_de_credits INT) RETURNS VOID AS
 $$
 BEGIN
     -- Le bloc est déterminé grâce au trigger_verifier_ue
-    INSERT INTO project_sql.ues VALUES (DEFAULT, _code_ue, _nom, DEFAULT, _nombre_de_credits, DEFAULT);
+    INSERT INTO project_sql.ues VALUES (DEFAULT, _code_ue, _nom, _bloc, _nombre_de_credits, DEFAULT);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -342,34 +346,6 @@ $$ LANGUAGE plpgsql;
 ---------------------------------------------------------------------------
 ----------------------PROCEDURES-WITH-TRIGGER------------------------------
 ---------------------------------------------------------------------------
-
-/**
-  Vérifie que le code de l'ue est correcte et attribue le bloc en fonction de ce code
- */
-CREATE OR REPLACE FUNCTION project_sql.verifier_ue() RETURNS TRIGGER AS
-$$
-BEGIN
-    IF upper(NEW.code_ue) LIKE 'BINV1%' THEN
-        NEW.bloc = 1;
-    ELSIF upper(NEW.code_ue) LIKE 'BINV2%' THEN
-        NEW.bloc = 2;
-    ELSIF upper(NEW.code_ue) LIKE 'BINV3%' THEN
-        NEW.bloc = 3;
-    ELSE
-        RAISE 'Code ue non conforme.';
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_verifier_ue
-    BEFORE INSERT
-    ON project_sql.ues
-    FOR EACH ROW
-EXECUTE PROCEDURE project_sql.verifier_ue();
-
----------------------------------------------------------------------
 
 /**
   Ajoute un pae à l''étudiant qui vient d''être créé.
