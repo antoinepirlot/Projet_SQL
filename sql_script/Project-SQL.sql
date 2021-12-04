@@ -303,31 +303,30 @@ $$
 DECLARE
     _etudiant RECORD;
 BEGIN
-    SELECT id_etudiant, COUNT(*) AS "count"
-    FROM project_sql.etudiants
-    WHERE email = _email
-    GROUP BY id_etudiant
-    INTO _etudiant;
 
     IF NOT EXISTS(SELECT id_etudiant
                   FROM project_sql.etudiants
                   WHERE email = _email
         ) THEN
         RAISE 'L''étudiant n''existe pas' ;
-    end if;
+    END IF;
 
-    --TODO à mettre dans un TRIGGER
+    SELECT id_etudiant, COUNT(*) AS "count"
+    FROM project_sql.etudiants
+    WHERE email = _email
+    GROUP BY id_etudiant
+    INTO _etudiant;
+
     IF _etudiant.count = 0 THEN
         RAISE 'L''émail ou le mot de passe est incorrect';
     END IF;
 
-    --TODO CREATE USER etc
-    --RETURN _etudiant.id_etudiant;
-
-    RETURN QUERY SELECT mot_de_passe FROM project_sql.etudiants e WHERE e.email = _email;
+    RETURN QUERY
+        SELECT mot_de_passe
+        FROM project_sql.etudiants e
+        WHERE e.email = _email;
 END;
 $$ LANGUAGE plpgsql;
-
 ---------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION project_sql.a_valider_les_ues_prerequises(_id_ue INT, _id_etudiant INT) RETURNS BOOLEAN AS
