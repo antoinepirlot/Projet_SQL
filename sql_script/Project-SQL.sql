@@ -673,13 +673,6 @@ BEGIN
         RAISE 'Ton PAE ne peut pas être vide.';
     END IF;
 
-    -- Si la somme des crédits précédemment validés et ceux du PAE atteignent 180, le PAE
-    -- ne peut pas dépasser 74 crédits
-    IF (_etudiant_et_pae.nombre_de_credits_valides + _etudiant_et_pae.nombre_de_credits_total = 180 AND
-        _etudiant_et_pae.nombre_de_credits_total > 74) THEN
-        RAISE 'Impossible de valider le pae, il doit y avoir au maximum 74 crédits.';
-    END IF;
-
     -- Si l’étudiant n’a pas validé au moins 45 crédits dans le passé, alors son PAE ne pourra
     -- pas dépasser 60 crédits
     IF _etudiant_et_pae.nombre_de_credits_valides < 45 AND _etudiant_et_pae.nombre_de_credits_total > 60 THEN
@@ -692,16 +685,23 @@ BEGIN
         RAISE 'Impossible de valider le pae, tu dois avoir entre 55 et 74 crédits dans ton pae.';
     END IF;
 
+    -- Si la somme des crédits précédemment validés et ceux du PAE atteignent 180, le PAE
+    -- ne peut pas dépasser 74 crédits
+    IF (_etudiant_et_pae.nombre_de_credits_valides + _etudiant_et_pae.nombre_de_credits_total = 180 AND
+        _etudiant_et_pae.nombre_de_credits_total > 74) THEN
+        RAISE 'Impossible de valider le pae, il doit y avoir au maximum 74 crédits.';
+    END IF;
+
+    --Mets l''étudiant en bloc 1 si ses crédits validés sont strictement inférieur à 45
+    IF _etudiant_et_pae.nombre_de_credits_valides < 45 THEN
+    UPDATE project_sql.etudiants
+    SET bloc = 1
+    WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
+
     --Mets un etudiant au bloc 3 si la somme de ses crédits en cours et ceux validé sont de 180 ou plus
-    IF _etudiant_et_pae.nombre_de_credits_total + _etudiant_et_pae.nombre_de_credits_valides >= 180 THEN
+    ELSIF _etudiant_et_pae.nombre_de_credits_total + _etudiant_et_pae.nombre_de_credits_valides >= 180 THEN
         UPDATE project_sql.etudiants
         SET bloc = 3
-        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
-
-        --Mets l''étudiant en bloc 1 si ses crédits validés sont strictement inférieur à 45
-    ELSIF _etudiant_et_pae.nombre_de_credits_valides < 45 THEN
-        UPDATE project_sql.etudiants
-        SET bloc = 1
         WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
 
         --Mets l''étudiant en bloc 2 si les 2 conditions ci-dessus n''ont pas été true
