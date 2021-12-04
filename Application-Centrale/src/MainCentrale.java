@@ -7,8 +7,23 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class MainCentrale {
-    private final Connection CONNECTION = connexionDb();
+    private final Connection CONNEXION = connexionDb();
     private final Scanner SCANNER = new Scanner(System.in);
+
+    public void afficherMenu(){
+        System.out.println();
+        System.out.println("Que voulez vous faire?");
+        System.out.println();
+
+        System.out.println("1 -> Ajouter une ue");
+        System.out.println("2 -> Ajouter un prerequis √† une ue existante");
+        System.out.println("3 -> Ajouter un √©tudiant");
+        System.out.println("4 -> Encoder une ue valid√©e pour un √©tudiant");
+        System.out.println("5 -> Visualiser tous les √©tudiants d'un bloc particulier");
+        System.out.println("6 -> Visualiser tous les √©tudiants");
+        System.out.println("7 -> Visualiser tous les √©tudiants qui n'ont pas encore valid√© leur PAE");
+        System.out.println("8 -> Visualiser les UEs d'un bloc en particulier");
+    }
 
     public void ajouterUe() {
         System.out.println("Quel est le code de l'ue?");
@@ -17,18 +32,23 @@ public class MainCentrale {
         System.out.println("Quel est le nom de l'ue?");
         String nomUe = SCANNER.nextLine();
 
-        System.out.println("Quel est le nombre de crÈdits pour cette ue?");
+        System.out.println("Quel est le num√©ro du bloc?");
+        int bloc = SCANNER.nextInt();
+        SCANNER.nextLine();
+
+        System.out.println("Quel est le nombre de cr√©dits pour cette ue?");
         int nombreDeCredits = SCANNER.nextInt();
         SCANNER.nextLine();
 
         try {
-            PreparedStatement ps = CONNECTION.prepareStatement("SELECT project_sql.ajouter_ue(?, ?, ?);");
+            PreparedStatement ps = CONNEXION.prepareStatement("SELECT project_sql.ajouter_ue(?, ?, ?, ?);");
             ps.setString(1, codeUe);
             ps.setString(2, nomUe);
-            ps.setInt(3, nombreDeCredits);
+            ps.setInt(3, bloc);
+            ps.setInt(4, nombreDeCredits);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    System.out.println("L'ue a bien ÈtÈ ajoutÈe.");
+                    System.out.println("L'ue a bien √©t√© ajout√©e.");
                 }
             }
 
@@ -40,49 +60,49 @@ public class MainCentrale {
 
     public void ajouterPrerequis() {
         System.out.println("Quel est le code de l'ue?");
-        String code_ue = SCANNER.next();
+        String code_ue = SCANNER.nextLine();
 
-        System.out.println("Quel est le code de l'ue prÈrequise?");
-        String code_ue_prerequise = SCANNER.next();
+        System.out.println("Quel est le code de l'ue pr√©requise?");
+        String code_ue_prerequise = SCANNER.nextLine();
 
         try {
-            PreparedStatement ps = CONNECTION.prepareStatement("SELECT project_sql.ajouter_prerequis_ue(?, ?);");
+            PreparedStatement ps = CONNEXION.prepareStatement("SELECT project_sql.ajouter_prerequis_ue(?, ?);");
             ps.setString(1, code_ue);
             ps.setString(2, code_ue_prerequise);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    System.out.println("Ajout rÈussi!");
+                    System.out.println("Ajout r√©ussi!");
                 }
             }
         } catch (SQLException e) {
-            System.out.println("ProblËme lors de l'insertion.");
+            System.out.println("Probl√®me lors de l'insertion.");
             System.out.println(e.getMessage());
         }
     }
 
     public void ajouterEtudiant() {
-        System.out.println("Quel est le nom de l'Ètudiant?");
-        String nomEtudiant = SCANNER.next();
+        System.out.println("Quel est le nom de l'√©tudiant?");
+        String nomEtudiant = SCANNER.nextLine();
 
-        System.out.println("Quel est le prÈnom de l'Ètudiant?");
-        String prenomEtudiant = SCANNER.next();
+        System.out.println("Quel est le pr√©nom de l'√©tudiant?");
+        String prenomEtudiant = SCANNER.nextLine();
 
-        System.out.println("Quel est l'email de l'Ètudiant?");
-        String emailEtudiant = SCANNER.next();
+        System.out.println("Quel est l'email de l'√©tudiant?");
+        String emailEtudiant = SCANNER.nextLine();
 
-        System.out.println("Quel est le mot de passe de l'Ètudiant?");
+        System.out.println("Quel est le mot de passe de l'√©tudiant?");
         String sel = BCrypt.gensalt();
-        String motDePassse = BCrypt.hashpw(SCANNER.next(), sel);
+        String motDePassse = BCrypt.hashpw(SCANNER.nextLine(), sel);
 
         try {
-            PreparedStatement ps = CONNECTION.prepareStatement("SELECT project_sql.ajouter_etudiant(?, ?, ?, ?)");
+            PreparedStatement ps = CONNEXION.prepareStatement("SELECT project_sql.ajouter_etudiant(?, ?, ?, ?)");
             ps.setString(1, nomEtudiant);
             ps.setString(2, prenomEtudiant);
             ps.setString(3, emailEtudiant);
             ps.setString(4, motDePassse);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    System.out.println("Ajout rÈussi!");
+                    System.out.println("Ajout r√©ussi!");
                 }
             }
         } catch (SQLException e) {
@@ -91,19 +111,19 @@ public class MainCentrale {
     }
 
     public void encoderUeValidee() {
-        System.out.println("Quel est l'email de l'Ètudiant?");
-        String emailEtudiant = SCANNER.next();
+        System.out.println("Quel est l'email de l'√©tudiant?");
+        String emailEtudiant = SCANNER.nextLine();
 
         System.out.println("Quel est le code de l'ue a valider?");
-        String codeUe = SCANNER.next();
+        String codeUe = SCANNER.nextLine();
 
         try {
-            PreparedStatement ps = CONNECTION.prepareStatement("SELECT project_sql.encoder_ue_validee(?, ?);");
+            PreparedStatement ps = CONNEXION.prepareStatement("SELECT project_sql.encoder_ue_validee(?, ?);");
             ps.setString(1, emailEtudiant);
             ps.setString(2, codeUe);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    System.out.println("Validation rÈussie");
+                    System.out.println("Validation r√©ussie");
                 }
             }
         } catch (SQLException e) {
@@ -114,12 +134,13 @@ public class MainCentrale {
     public void visualiserTousLesEtudiantDUnBloc() {
         int bloc = -1;
         while (bloc < 0 || bloc > 3) {
-            System.out.println("De quel bloc voulez vous voir les Ètudiant?");
-            System.out.println("0 -> Bloc indÈterminÈ");
+            System.out.println("De quel bloc voulez vous voir les √©tudiant?");
+            System.out.println("0 -> Bloc ind√©termin√©");
             System.out.println("1 -> Bloc 1");
             System.out.println("2 -> Bloc 2");
             System.out.println("3 -> Bloc 3");
             bloc = SCANNER.nextInt();
+            SCANNER.nextLine();
         }
         String query;
         try {
@@ -129,27 +150,27 @@ public class MainCentrale {
                         """;
             else
                 query = "SELECT nom, prenom, nombre_de_credits_valides FROM project_sql.etudiants WHERE \"bloc\" =" + bloc + "";
-            Statement statement = CONNECTION.createStatement();
+            Statement statement = CONNEXION.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
                 String nom = resultSet.getString(1);
                 String prenom = resultSet.getString(2);
                 String nombreDeCredits = resultSet.getString(3);
-                System.out.println("Nom: " + nom + ", prÈnom: " + prenom + ", nombre de crÈdits validÈs: " + nombreDeCredits);
+                System.out.println("Nom: " + nom + ", pr√©nom: " + prenom + ", nombre de cr√©dits valid√©s: " + nombreDeCredits);
             }
         } catch (SQLException e) {
-            System.out.println("ProblËme lors de la demande ‡ la base de donnÈes");
+            System.out.println("Probl√®me lors de la demande √† la base de donn√©es");
             e.printStackTrace();
         }
     }
 
     public void visualiserTousLesEtudiants() {
         try {
-            PreparedStatement ps = CONNECTION.prepareStatement("SELECT * FROM project_sql.visualiser_tous_les_etudiants");
+            PreparedStatement ps = CONNEXION.prepareStatement("SELECT * FROM project_sql.visualiser_tous_les_etudiants");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    System.out.println("Nom: " + rs.getString(1) + ", PrÈnom: " + rs.getString(2) +
-                            ", bloc: " + rs.getString(3) + ", nombre de crÈdits dans le pae: " + rs.getString(4));
+                    System.out.println("Nom: " + rs.getString(1) + ", Pr√©nom: " + rs.getString(2) +
+                            ", bloc: " + rs.getString(3) + ", nombre de cr√©dits dans le pae: " + rs.getString(4));
                 }
             }
         } catch (SQLException e) {
@@ -159,12 +180,12 @@ public class MainCentrale {
 
     public void visualiserEtudiantPAENonValide() {
         try {
-            PreparedStatement ps = CONNECTION.prepareStatement("SELECT * FROM project_sql.visualiser_etudiant_pae_non_valide");
+            PreparedStatement ps = CONNEXION.prepareStatement("SELECT * FROM project_sql.visualiser_etudiant_pae_non_valide");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     System.out.print("Nom: " + rs.getString(1) + " ");
-                    System.out.print("PrÈnom: " + rs.getString(2) + " ");
-                    System.out.println("Nombre de crÈdits dÈj‡ validÈs: " + rs.getInt(3) + " ");
+                    System.out.print("Pr√©nom: " + rs.getString(2) + " ");
+                    System.out.println("Nombre de cr√©dits d√©j√† valid√©s: " + rs.getInt(3) + " ");
                 }
             }
         } catch (SQLException e) {
@@ -174,7 +195,7 @@ public class MainCentrale {
 
     public void visualiserUEDUnBloc() {
         try {
-            PreparedStatement ps = CONNECTION.prepareStatement("SELECT * FROM project_sql.visualier_ue_bloc WHERE \"bloc\" = ?");
+            PreparedStatement ps = CONNEXION.prepareStatement("SELECT * FROM project_sql.visualier_ue_bloc WHERE \"bloc\" = ?");
             System.out.println("De quel bloc voulez vous voir les ues?");
             int bloc = SCANNER.nextInt();
             SCANNER.nextLine();
@@ -194,7 +215,7 @@ public class MainCentrale {
         }
     }
 
-    public Connection connexionDb() {
+    private Connection connexionDb() {
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
@@ -213,5 +234,20 @@ public class MainCentrale {
             System.exit(1);
         }
         return connection;
+    }
+
+    public void afficherFin(){
+        dexonnexion();
+        System.out.println("Fin du programme. Bonne journ√©e.");
+        System.out.println();
+    }
+
+    private void dexonnexion(){
+        try{
+            CONNEXION.close();
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la fermeture de la connection a la DB.");
+            System.out.println(e.getMessage());
+        }
     }
 }

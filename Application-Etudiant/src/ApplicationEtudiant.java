@@ -1,43 +1,30 @@
+/**
+ * @Author Pirlot Antoine
+ * @Author Dimitriadis Nicolas
+ */
+
 import java.util.Scanner;
 
 public class ApplicationEtudiant {
-    static Scanner scanner = new Scanner(System.in);
-    static MainEtudiant app = new MainEtudiant();
+    public static final Scanner SCANNER = new Scanner(System.in);
+    public static final MainEtudiant APP = new MainEtudiant();
 
     public static void main(String[] args){
-        boolean boucle =  true ;
-        app.connexionEtudiant();
-        while(boucle) {
-            System.out.println(app.menu());
-            int choix = scanner.nextInt();
-            switch(choix){
-                case 1 :
-                    app.ajouterUePae();
-                    break;
-                case 2 :
-                    app.enleverUePae();
-                    break;
-                case 3 :
-                    app.validerPae();
-                    break;
-                case 4 :
-                    app.afficherUesAutorisees();
-                    break;
-                case 5 :
-                    app.visualiserPae();
-                    break;
-                case 6 :
-                    app.reinitialiserPae();
-                    break;
-                case 0 :
-                    boucle = false;
-                    app.exit();
-                    break;
-                default :
-                    System.out.println(app.menu());
-                    break;
-            }
+        int choix;
+        do {
+            APP.afficherMenu();
+            choix = SCANNER.nextInt();
+            SCANNER.nextLine();
 
-        }
+            switch (choix) {
+                case 1 -> APP.ajouterUePae();
+                case 2 -> APP.enleverUePae();
+                case 3 -> APP.validerPae();
+                case 4 -> APP.afficherUesAutorisees();
+                case 5 -> APP.visualiserPae();
+                case 6 -> APP.reinitialiserPae();
+                default -> APP.afficherFin();
+            }
+        } while (choix >= 1 && choix <= 6);
     }
 }

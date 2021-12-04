@@ -3,7 +3,6 @@
  * @Author Dimitriadis Nicolas
  */
 
-import java.sql.*;
 import java.util.Scanner;
 
 public class ApplicationCentrale {
@@ -16,19 +15,7 @@ public class ApplicationCentrale {
 
         int choix;
         do {
-            System.out.println();
-            System.out.println("Que voulez vous faire?");
-            System.out.println();
-
-            System.out.println("1 -> Ajouter une ue");
-            System.out.println("2 -> Ajouter un prerequis à une ue existante");
-            System.out.println("3 -> Ajouter un étudiant");
-            System.out.println("4 -> Encoder une ue validée pour un étudiant");
-            System.out.println("5 -> Visualiser tous les étudiants d'un bloc particulier");
-            System.out.println("6 -> Visualiser tous les étudiants");
-            System.out.println("7 -> Visualiser tous les étudiants qui n'ont pas encore validé leur PAE");
-            System.out.println("8 -> Visualiser les UEs d'un bloc en particulier");
-
+            APP.afficherMenu();
             choix = SCANNER.nextInt();
             SCANNER.nextLine();
             switch (choix) {
@@ -40,10 +27,7 @@ public class ApplicationCentrale {
                 case 6 -> APP.visualiserTousLesEtudiants();
                 case 7 -> APP.visualiserEtudiantPAENonValide();
                 case 8 -> APP.visualiserUEDUnBloc();
-                default -> {
-                    System.out.println("Fin du programme. Bonne journée.");
-                    System.out.println();
-                }
+                default -> APP.afficherFin();
             }
         } while (1 <= choix && choix <= 8);
     }
