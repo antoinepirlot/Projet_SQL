@@ -774,10 +774,10 @@ SELECT DISTINCT ue.code_ue           AS "code_ue",
                 ue.nombre_de_credits AS "nombre_de_credits",
                 ue.bloc              AS "bloc",
                 e.email              AS "email"
-FROM project_sql.paes pae,
-     project_sql.ues_pae ue_pae,
-     project_sql.ues ue,
-     project_sql.etudiants e
+FROM project_sql.ues ue,
+     project_sql.etudiants e,
+     project_sql.paes pae,
+     project_sql.ues_pae ue_pae
 WHERE pae.id_etudiant = e.id_etudiant
   AND ue_pae.code_pae = pae.code_pae
   AND ue.id_ue = ue_pae.id_ue
