@@ -115,7 +115,7 @@ public class MainEtudiant {
                 System.out.println("-------------UES DISPONIBLES----------------");
                 while (rs.next()) {
                     System.out.println("Code UE : " + rs.getString(1) + " | " + "Nom UE : " + rs.getString(2) + " | " + "Nombre de credits : " + rs.getInt(3) + " | " + "Bloc UE : " + rs.getInt(4));
-                    System.out.println("");
+                    System.out.println();
                 }
                 System.out.println("--------------------------------------------");
             }
@@ -135,7 +135,7 @@ public class MainEtudiant {
                 System.out.println("-------------------PAE----------------------");
                 while (rs.next()) {
                     System.out.println("Code UE : " + rs.getString(1) + " | " + "Nom UE : " + rs.getString(2) + " | " + "Nombre de credits : " + rs.getInt(3) + " | " + "Bloc UE : " + rs.getInt(4));
-                    System.out.println("");
+                    System.out.println();
                 }
                 System.out.println("--------------------------------------------");
             }
@@ -168,11 +168,7 @@ public class MainEtudiant {
             System.out.println("Driver PostgeSQL manquant!");
             System.exit(1);
         }
-
-        //TODO
-        //String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
-        String url = "jdbc:postgresql://localhost:5432/dbantoinepirlot";
-
+        String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(url, "nicolasdimitriadis", "0JE9SRO2G");
