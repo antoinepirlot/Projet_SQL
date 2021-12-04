@@ -21,8 +21,9 @@ public class MainEtudiant {
         System.out.println("3 -> Valider le PAE.");
         System.out.println("4 -> Afficher les UE autorisees a l'ajout.");
         System.out.println("5 -> Visualiser le PAE.");
-        System.out.println("6 -> Reinitialiser le PAE.");
-        System.out.println("0 -> Quitter l'application.");
+        System.out.println("6 -> Réinitialiser le PAE.");
+        System.out.println("7 -> Changer de compte.");
+        System.out.println("Autre -> Quitter l'application.");
     }
 
     public void connexionEtudiant() {
@@ -169,8 +170,7 @@ public class MainEtudiant {
             System.out.println("Driver PostgeSQL manquant!");
             System.exit(1);
         }
-//        String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
-        String url = "jdbc:postgresql://localhost:5432/dbantoinepirlot";
+        String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(url, "nicolasdimitriadis", "0JE9SRO2G");
@@ -179,6 +179,12 @@ public class MainEtudiant {
             System.exit(1);
         }
         return connection;
+    }
+
+    public void changerDeCompte(){
+        System.out.println("Vous êtes déconnecté.");
+        System.out.println();
+        connexionEtudiant();
     }
 
     public void afficherFin() {

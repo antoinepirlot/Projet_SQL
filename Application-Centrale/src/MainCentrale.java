@@ -15,14 +15,15 @@ public class MainCentrale {
         System.out.println("Que voulez vous faire?");
         System.out.println();
 
-        System.out.println("1 -> Ajouter une ue");
-        System.out.println("2 -> Ajouter un prerequis à une ue existante");
-        System.out.println("3 -> Ajouter un étudiant");
-        System.out.println("4 -> Encoder une ue validée pour un étudiant");
-        System.out.println("5 -> Visualiser tous les étudiants d'un bloc particulier");
-        System.out.println("6 -> Visualiser tous les étudiants");
-        System.out.println("7 -> Visualiser tous les étudiants qui n'ont pas encore validé leur PAE");
-        System.out.println("8 -> Visualiser les UEs d'un bloc en particulier");
+        System.out.println("1 -> Ajouter une ue.");
+        System.out.println("2 -> Ajouter un prerequis à une ue existante.");
+        System.out.println("3 -> Ajouter un étudiant.");
+        System.out.println("4 -> Encoder une ue validée pour un étudiant.");
+        System.out.println("5 -> Visualiser tous les étudiants d'un bloc particulier.");
+        System.out.println("6 -> Visualiser tous les étudiants.");
+        System.out.println("7 -> Visualiser tous les étudiants qui n'ont pas encore validé leur PAE.");
+        System.out.println("8 -> Visualiser les UEs d'un bloc en particulier.");
+        System.out.println("Autre -> Quitter l'application.");
     }
 
     public void ajouterUe() {
@@ -222,7 +223,8 @@ public class MainCentrale {
             System.out.println("Driver PostgeSQL manquant!");
             System.exit(1);
         }
-        String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
+//        String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
+        String url = "jdbc:postgresql://localhost:5432/dbantoinepirlot";
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(url, "antoinepirlot", "at5BER69h");
