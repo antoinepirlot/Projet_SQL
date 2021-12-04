@@ -39,8 +39,6 @@ INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 10);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 11);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 12);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 13);
-INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 14);
-
 
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (6, 1);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (6, 2);
