@@ -866,6 +866,7 @@ SELECT DISTINCT e.nom                     AS "nom",
                 p.nombre_de_credits_total AS "nombre_de_credits_pae"
 FROM project_sql.etudiants e,
      project_sql.paes p
+WHERE e.id_etudiant = p.id_etudiant
 ORDER BY p.nombre_de_credits_total;
 
 ---------------------------------------------------------------------------
