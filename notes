@@ -1,5 +1,3 @@
-Nous avons décidé d'obliger un étudiant ayant validé moins de 45 crédits
-d'ajouter toutes les ues du bloc 1 pour valider son pae.
-Car en lisant les consignes, nous comprenions alors que
-l'étudiant aurait pu valider son pae avec autant d'ue dispobible
-qu'il souhaite mais aussi 0 ue, ce qui n'a pas de sens à nos yeux.
+Nous avons fait en sorte que les ues que l'étudiant peut ajouté
+ne soient pas montrées dans le cas où il a déjà validé son pae car il ne
+pourra pas ajouter d'ue une fois validé.

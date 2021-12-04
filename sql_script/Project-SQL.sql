@@ -668,6 +668,11 @@ BEGIN
         RAISE 'PAE déjà validé';
     END IF;
 
+    -- Vérifie que l'étudiant n'a pas validé un pae vide
+    IF _etudiant_et_pae.nombre_de_credits_total = 0 THEN
+        RAISE 'Ton PAE ne peut pas être vide.';
+    END IF;
+
     -- Si la somme des crédits précédemment validés et ceux du PAE atteignent 180, le PAE
     -- ne peut pas dépasser 74 crédits
     IF (_etudiant_et_pae.nombre_de_credits_valides + _etudiant_et_pae.nombre_de_credits_total = 180 AND
@@ -677,9 +682,8 @@ BEGIN
 
     -- Si l’étudiant n’a pas validé au moins 45 crédits dans le passé, alors son PAE ne pourra
     -- pas dépasser 60 crédits
-    IF _etudiant_et_pae.nombre_de_credits_valides < 45
-        AND 60 - _etudiant_et_pae.nombre_de_credits_valides - _etudiant_et_pae.nombre_de_credits_total <> 0 THEN
-        RAISE 'Ton pae ne contient pas les ues du bloc 1 restante et tu ne peux avoir que des ues du bloc 1 car tu as validé moins de 45 crédits.';
+    IF _etudiant_et_pae.nombre_de_credits_valides < 45 AND _etudiant_et_pae.nombre_de_credits_total > 60 THEN
+        RAISE 'Ton pae ne peut pas avoir plus de 60 crédits car tu as validés moins de 45 crédits.';
     END IF;
 
     -- Si l'étudiant est en bloc 2, le nombre de crédit du PAE devra être entre 55 et 74 crédits
@@ -809,8 +813,11 @@ SELECT ue.code_ue           AS "code_ue",
        ue.bloc              AS "bloc",
        e.email              AS "email"
 FROM project_sql.etudiants e,
+     project_sql.paes p,
      project_sql.ues ue
-WHERE (ue.id_ue NOT IN (SELECT up.id_ue
+WHERE p.id_etudiant = e.id_etudiant
+  AND p.valide IS FALSE
+  AND (ue.id_ue NOT IN (SELECT up.id_ue
                         FROM project_sql.ues_pae up,
                              project_sql.paes p
                         WHERE up.code_pae = p.code_pae
