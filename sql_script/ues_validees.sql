@@ -11,15 +11,21 @@ INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (1, 10);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (1, 11);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (1, 12);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (1, 13);
+
+
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (2, 1);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (2, 4);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (2, 2);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (2, 6);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (2, 11);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (2, 5);
+
+
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (3, 11);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (3, 10);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (3, 1);
+
+
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 1);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 2);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 3);
@@ -34,6 +40,8 @@ INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 11);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 12);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 13);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (5, 14);
+
+
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (6, 1);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (6, 2);
 INSERT INTO project_sql.ues_validees (id_etudiant, id_ue) VALUES (6, 3);
