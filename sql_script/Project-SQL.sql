@@ -16,10 +16,10 @@ CREATE SCHEMA project_sql;
 CREATE TABLE project_sql.etudiants
 (
     id_etudiant               SERIAL PRIMARY KEY,
-    nom                       VARCHAR(100) NOT NULL CHECK ( nom <> '''' ),
-    prenom                    VARCHAR(100) NOT NULL CHECK ( prenom <> '''' ),
-    email                     VARCHAR(150) NOT NULL UNIQUE CHECK ( email <> ''''),
-    mot_de_passe              CHAR(60)     NOT NULL CHECK ( mot_de_passe <> '''' ),
+    nom                       VARCHAR(100) NOT NULL CHECK ( nom <> '' ),
+    prenom                    VARCHAR(100) NOT NULL CHECK ( prenom <> '' ),
+    email                     VARCHAR(150) NOT NULL UNIQUE CHECK ( email <> ''),
+    mot_de_passe              CHAR(60)     NOT NULL CHECK ( mot_de_passe <> '' ),
     bloc                      INT CHECK ( bloc IS NULL OR bloc IN (1, 2, 3)),
     nombre_de_credits_valides INT          NOT NULL DEFAULT 0 CHECK ( nombre_de_credits_valides >= 0 AND nombre_de_credits_valides <= 180)
 );
