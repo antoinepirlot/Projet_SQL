@@ -765,6 +765,9 @@ FROM project_sql.etudiants;
 
 ---------------------------------------------------------------------
 
+/**
+  Visualise les ues qui sont dans le pae de l'étudiant
+ */
 CREATE OR REPLACE VIEW project_sql.visualiser_pae as
 SELECT DISTINCT ue.code_ue           AS "code_ue",
                 ue.nom               AS "nom",
@@ -782,6 +785,9 @@ ORDER BY ue.code_ue;
 
 ---------------------------------------------------------------------
 
+/**
+  Visualise les étudiants qui n'ont pas encore validés leur pae
+ */
 CREATE OR REPLACE VIEW project_sql.visualiser_etudiant_pae_non_valide AS
 SELECT DISTINCT e.nom                       AS "nom",
                 e.prenom                    AS "prenom",
@@ -793,6 +799,9 @@ WHERE e.id_etudiant = p.id_etudiant
 
 ---------------------------------------------------------------------
 
+/**
+  Visualise les ues que l'étudiant peut ajouter à son pae
+ */
 CREATE OR REPLACE VIEW project_sql.visualiser_ue_disponible_pae AS
 SELECT ue.code_ue           AS "code_ue",
        ue.nom               AS "nom",
@@ -815,6 +824,9 @@ WHERE (ue.id_ue NOT IN (SELECT up.id_ue
 
 ---------------------------------------------------------------------
 
+/**
+  Visualise les ue par bloc
+ */
 CREATE OR REPLACE VIEW project_sql.visualier_ue_bloc AS
 SELECT code_ue           AS "code_ue",
        nom               AS "nom",
@@ -825,6 +837,9 @@ ORDER BY nombre_d_inscrits;
 
 ---------------------------------------------------------------------
 
+/**
+  Visualise tous les étudiants
+ */
 CREATE OR REPLACE VIEW project_sql.visualiser_tous_les_etudiants AS
 SELECT DISTINCT e.nom                     AS "nom",
                 e.prenom                  AS "prenom",
