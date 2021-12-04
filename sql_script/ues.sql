@@ -1,4 +1,3 @@
--- BLOC 1
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (1, 'BINV1010-1', 'Algorithmique', 1, 6, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (2, 'BINV1020-1', 'Analyse et programmation orientée objet', 1, 6, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (3, 'BINV1030-1', 'Gestion de données: bases', 1, 5, 0);
@@ -12,8 +11,6 @@ INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombr
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (11, 'BINV1100-1', 'Mathématiques 2', 1, 6, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (12, 'BINV1110-1', 'Projet Web 1', 1, 3, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (13, 'BINV1120-1', 'Anglais', 1, 4, 0);
-
--- BLOC 2
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (14, 'BINV2011-1', 'Langage C', 2, 3, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (15, 'BINV2160-1', 'Analayse et modélisation', 2, 4, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (16, 'BINV2040-1', 'Gestion des données: Avancé', 2, 6, 0);
@@ -26,8 +23,6 @@ INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombr
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (23, 'BINV2181-2', 'Linux: Programmation distribuée', 2, 6, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (24, 'BINV2110-2', 'Informatique mobile', 2, 3, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (25, 'BINV2120-1', 'Anglais 2', 2, 5, 0);
-
--- BLOC 3
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (26, 'BINV3170-2', 'Sécurité', 3, 3, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (27, 'BINV3180-1', 'Administration infrastructure', 3, 3, 0);
 INSERT INTO project_sql.ues (id_ue, code_ue, nom, bloc, nombre_de_credits, nombre_d_inscrits) VALUES (28, 'BINV3200-3', 'Organisation des entreprises', 3, 5, 0);
