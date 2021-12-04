@@ -784,24 +784,21 @@ WHERE e.id_etudiant = p.id_etudiant
 ---------------------------------------------------------------------
 
 CREATE OR REPLACE VIEW project_sql.visualiser_ue_disponible_pae AS
-SELECT ue.code_ue,
-       ue.nom,
-       ue.nombre_de_credits,
-       ue.bloc,
-       e.email AS "email"
+SELECT ue.code_ue           AS "code_ue",
+       ue.nom               AS "nom",
+       ue.nombre_de_credits AS "nombre_de_credits",
+       ue.bloc              AS "bloc",
+       e.email              AS "email"
 FROM project_sql.etudiants e,
      project_sql.ues ue
-WHERE ((ue.bloc = 1
-    AND (SELECT e2.nombre_de_credits_valides
-         FROM project_sql.etudiants e2
-         WHERE e2.id_etudiant = e.id_etudiant) < 30)
-    OR ((SELECT e2.nombre_de_credits_valides
-         FROM project_sql.etudiants e2
-         WHERE e2.id_etudiant = e.id_etudiant) >= 30
-        AND project_sql.a_valider_les_ues_prerequises(ue.id_ue, e.id_etudiant)))
-  AND ue.id_ue NOT IN (SELECT uv.id_ue
-                       FROM project_sql.ues_validees uv
-                       WHERE uv.id_etudiant = e.id_etudiant);
+WHERE (ue.id_ue NOT IN (SELECT up.id_ue
+                        FROM project_sql.ues_pae up)
+    AND ue.id_ue NOT IN (SELECT uv.id_ue
+                         FROM project_sql.ues_validees uv
+                         WHERE uv.id_etudiant = e.id_etudiant))
+   AND ((e.nombre_de_credits_valides >= 30 AND project_sql.a_valider_les_ues_prerequises(ue.id_ue, e.id_etudiant))
+     OR (e.nombre_de_credits_valides < 30
+         AND ue.bloc = 1));
 
 ---------------------------------------------------------------------
 
@@ -845,7 +842,8 @@ GRANT SELECT ON TABLE
     project_sql.paes,
     project_sql.ues_validees,
     project_sql.prerequis,
-    project_sql.visualiser_pae TO nicolasdimitriadis;
+    project_sql.visualiser_pae,
+    project_sql.visualiser_ue_disponible_pae TO nicolasdimitriadis;
 
 ---------------------------------------------------------------------
 
