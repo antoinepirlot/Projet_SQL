@@ -221,7 +221,10 @@ public class MainEtudiant {
             System.exit(1);
         }
 
-        String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
+        //TODO
+        //String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
+        String url = "jdbc:postgresql://localhost:5432/dbantoinepirlot";
+
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(url, "nicolasdimitriadis", "0JE9SRO2G");

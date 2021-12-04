@@ -5,6 +5,7 @@ public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
     private static final Connection connexion = connexionDb();
+
     public static void main(String[] args) {
         System.out.println("Bienvenue dans l'application centrale dédiée aux administrateurs.");
 
@@ -176,15 +177,15 @@ public class Main {
     }
 
     public static void visualiserTousLesEtudiants() {
-        try{
+        try {
             PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.visualiser_tous_les_etudiants");
-            try (ResultSet rs = ps.executeQuery()){
-                while (rs.next()){
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
                     System.out.println("Nom: " + rs.getString(1) + ", Prénom: " + rs.getString(2) +
                             ", bloc: " + rs.getString(3) + ", nombre de crédits dans le pae: " + rs.getString(4));
                 }
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -192,8 +193,8 @@ public class Main {
     public static void visualiserEtudiantPAENonValide() {
         try {
             PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.visualiser_etudiant_pae_non_valide");
-            try (ResultSet rs = ps.executeQuery()){
-                while (rs.next()){
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
                     System.out.print("Nom: " + rs.getString(1) + " ");
                     System.out.print("Prénom: " + rs.getString(2) + " ");
                     System.out.println("Nombre de crédits déjà validés: " + rs.getInt(3) + " ");
@@ -205,23 +206,23 @@ public class Main {
     }
 
     public static void visualiserUEDUnBloc() {
-        try{
+        try {
             PreparedStatement ps = connexion.prepareStatement("SELECT * FROM project_sql.visualier_ue_bloc WHERE \"bloc\" = ?");
             System.out.println("De quel bloc voulez vous voir les ues?");
             int bloc = scanner.nextInt();
             scanner.nextLine();
             ps.setInt(1, bloc);
-            try (ResultSet rs = ps.executeQuery()){
+            try (ResultSet rs = ps.executeQuery()) {
                 boolean uePresentes = false;
-                while (rs.next()){
-                    System.out.println("Code de l'ue: "+ rs.getString(1) + ", nom de l'ue: " + rs.getString(2) +
+                while (rs.next()) {
+                    System.out.println("Code de l'ue: " + rs.getString(1) + ", nom de l'ue: " + rs.getString(2) +
                             ", nombre d'inscrits: " + rs.getString(3));
                     uePresentes = true;
                 }
-                if(!uePresentes)
+                if (!uePresentes)
                     System.out.println("Il n'y a aucune UE pour ce bloc.");
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -234,7 +235,9 @@ public class Main {
             System.exit(1);
         }
 
-        String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
+        //TODO
+        //String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
+        String url = "jdbc:postgresql://localhost:5432/dbantoinepirlot";
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(url, "antoinepirlot", "at5BER69h");
