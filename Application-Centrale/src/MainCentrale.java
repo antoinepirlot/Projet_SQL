@@ -27,7 +27,7 @@ public class MainCentrale {
 
     public void ajouterUe() {
         System.out.println("Quel est le code de l'ue?");
-        String codeUe = SCANNER.nextLine();
+        String codeUe = SCANNER.nextLine().toUpperCase();
 
         System.out.println("Quel est le nom de l'ue?");
         String nomUe = SCANNER.nextLine();
@@ -60,10 +60,10 @@ public class MainCentrale {
 
     public void ajouterPrerequis() {
         System.out.println("Quel est le code de l'ue?");
-        String code_ue = SCANNER.nextLine();
+        String code_ue = SCANNER.nextLine().toUpperCase();
 
         System.out.println("Quel est le code de l'ue prérequise?");
-        String code_ue_prerequise = SCANNER.nextLine();
+        String code_ue_prerequise = SCANNER.nextLine().toUpperCase();
 
         try {
             PreparedStatement ps = CONNEXION.prepareStatement("SELECT project_sql.ajouter_prerequis_ue(?, ?);");
@@ -115,7 +115,7 @@ public class MainCentrale {
         String emailEtudiant = SCANNER.nextLine();
 
         System.out.println("Quel est le code de l'ue a valider?");
-        String codeUe = SCANNER.nextLine();
+        String codeUe = SCANNER.nextLine().toUpperCase();
 
         try {
             PreparedStatement ps = CONNEXION.prepareStatement("SELECT project_sql.encoder_ue_validee(?, ?);");

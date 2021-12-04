@@ -56,7 +56,7 @@ public class MainEtudiant {
 
     public void ajouterUePae() {
         System.out.println("Veuillez entrez le code de l'UE que vous souhaiter ajouter a votre PAE");
-        String code_ue = SCANNER.nextLine();
+        String code_ue = SCANNER.nextLine().toUpperCase();
         try {
             PreparedStatement ps = CONNEXION.prepareStatement("SELECT * FROM project_sql.ajouter_ue_pae(?,?)");
             ps.setString(1, emailEtudiant);
@@ -75,7 +75,7 @@ public class MainEtudiant {
 
     public void enleverUePae() {
         System.out.println("Veuillez entrez le code de l'UE que vous souhaiter enlever a votre PAE");
-        String code_ue = SCANNER.nextLine();
+        String code_ue = SCANNER.nextLine().toUpperCase();
         try {
             PreparedStatement ps = CONNEXION.prepareStatement("SELECT * FROM project_sql.enlever_ue_pae(?,?)");
             ps.setString(1, emailEtudiant);
@@ -169,7 +169,8 @@ public class MainEtudiant {
             System.out.println("Driver PostgeSQL manquant!");
             System.exit(1);
         }
-        String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
+//        String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
+        String url = "jdbc:postgresql://localhost:5432/dbantoinepirlot";
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(url, "nicolasdimitriadis", "0JE9SRO2G");
