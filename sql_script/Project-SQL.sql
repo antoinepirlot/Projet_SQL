@@ -802,7 +802,10 @@ SELECT ue.code_ue           AS "code_ue",
 FROM project_sql.etudiants e,
      project_sql.ues ue
 WHERE (ue.id_ue NOT IN (SELECT up.id_ue
-                        FROM project_sql.ues_pae up)
+                        FROM project_sql.ues_pae up,
+                             project_sql.paes p
+                        WHERE up.code_pae = p.code_pae
+                          AND p.id_etudiant = e.id_etudiant)
     AND ue.id_ue NOT IN (SELECT uv.id_ue
                          FROM project_sql.ues_validees uv
                          WHERE uv.id_etudiant = e.id_etudiant))
