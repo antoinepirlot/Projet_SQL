@@ -145,23 +145,20 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION project_sql.ajouter_ue_pae(_email VARCHAR(150), _code_ue VARCHAR(15)) RETURNS VOID AS
 $$
 DECLARE
-    _pae RECORD;
-    _ue  RECORD;
+    _record RECORD;
 BEGIN
-    SELECT p.code_pae
+    SELECT p.code_pae,
+           u.id_ue
     FROM project_sql.paes p,
-         project_sql.etudiants e
+         project_sql.etudiants e,
+         project_sql.ues u
     WHERE e.id_etudiant = p.id_etudiant
       AND e.email = _email
-    INTO _pae;
-
-    SELECT id_ue
-    FROM project_sql.ues
-    WHERE code_ue = _code_ue
-    INTO _ue;
+      AND u.code_ue = _code_ue
+    INTO _record;
 
     INSERT INTO project_sql.ues_pae
-    VALUES (_pae.code_pae, _ue.id_ue);
+    VALUES (_record.code_pae, _record.id_ue);
     --L'augmentation du nombre de crédits total du pae se fait grâce au trigger_augmenter_nombre_de_credits_pae
 END;
 $$ LANGUAGE plpgsql;
