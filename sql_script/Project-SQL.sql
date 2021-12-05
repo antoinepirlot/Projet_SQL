@@ -527,37 +527,37 @@ EXECUTE PROCEDURE project_sql.augmenter_credits_valides();
 CREATE OR REPLACE FUNCTION project_sql.determiner_bloc_etudiant() RETURNS TRIGGER AS
 $$
 DECLARE
-    _etudiant_et_pae RECORD ;
+    _record RECORD ;
 
 BEGIN
     --SELECT des données que l'on stockes dans des variables
     SELECT p.id_etudiant,
-           p.nombre_de_credits_total,
-           e.nombre_de_credits_valides,
+           p.nombre_de_credits_total AS "credits_pae",
+           e.nombre_de_credits_valides AS "credits_valides",
            e.bloc
     FROM project_sql.etudiants e,
          project_sql.paes p
     WHERE e.id_etudiant = p.id_etudiant
       AND e.id_etudiant = NEW.id_etudiant
-    INTO _etudiant_et_pae;
+    INTO _record;
 
     --Mets l'étudiant en bloc 1 si ses crédits validés sont strictement inférieur à 45
-    IF _etudiant_et_pae.nombre_de_credits_valides < 45 THEN
+    IF _record.credits_valides < 45 THEN
         UPDATE project_sql.etudiants
         SET bloc = 1
-        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
+        WHERE id_etudiant = _record.id_etudiant;
 
         --Mets un etudiant au bloc 3 si la somme de ses crédits en cours et ceux validé sont de 180 ou plus
-    ELSIF _etudiant_et_pae.nombre_de_credits_total + _etudiant_et_pae.nombre_de_credits_valides >= 180 THEN
+    ELSIF _record.credits_pae + _record.credits_valides >= 180 THEN
         UPDATE project_sql.etudiants
         SET bloc = 3
-        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
+        WHERE id_etudiant = _record.id_etudiant;
 
         --Mets l'étudiant en bloc 2 si les 2 conditions ci-dessus n'ont pas été true
     ELSE
         UPDATE project_sql.etudiants
         SET bloc = 2
-        WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
+        WHERE id_etudiant = _record.id_etudiant;
     END IF;
     -- La vérification des crédits dans le pae se fait grâce au trigger_verifier_bloc_validation
     RETURN NEW;
