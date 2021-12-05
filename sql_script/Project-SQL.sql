@@ -1,17 +1,6 @@
----------------------------------------------------------------------------
--------------------------------PROJET-SQL----------------------------------
----------------------------------------------------------------------------
-
----------------------------------------------------------------------------
-------------------------------CREATE-SCHEMA--------------------------------
----------------------------------------------------------------------------
-
+-- Authors: Dimitriadis Nicolas & Pirlot Antoine
 DROP SCHEMA IF EXISTS project_sql CASCADE;
 CREATE SCHEMA project_sql;
-
----------------------------------------------------------------------------
------------------------------CREATE-TABLES---------------------------------
----------------------------------------------------------------------------
 
 CREATE TABLE project_sql.etudiants
 (
@@ -75,11 +64,9 @@ CREATE TABLE project_sql.ues_pae
     FOREIGN KEY (code_pae) REFERENCES project_sql.paes (code_pae),
     FOREIGN KEY (id_ue) REFERENCES project_sql.ues (id_ue)
 );
-
 ---------------------------------------------------------------------------
------------------------APPLICATION-CENTRALE-ADMIN--------------------------
+-----------------------PROCEDURE-WHITOUT-TRIGGERS--------------------------
 ---------------------------------------------------------------------------
-
 /**
   Ajoute une ue dans la table ues
   On ne sait pas pourquoi mais il faut relancer le script une deuxième fois à cause du bug:
@@ -89,12 +76,10 @@ CREATE OR REPLACE FUNCTION project_sql.ajouter_ue(_code_ue VARCHAR(15), _nom VAR
                                                   _nombre_de_credits INT) RETURNS VOID AS
 $$
 BEGIN
-    -- Le bloc est déterminé grâce au trigger_verifier_ue
     INSERT INTO project_sql.ues VALUES (DEFAULT, _code_ue, _nom, _bloc, _nombre_de_credits, DEFAULT);
+    -- Le bloc est déterminé grâce au trigger_verifier_ue
 END;
 $$ LANGUAGE plpgsql;
-
----------------------------------------------------------------------
 
 /**
   Ajoute un prérequis à une ue
@@ -115,13 +100,11 @@ BEGIN
     WHERE code_ue = _code_ue_prerequise
     INTO _ue_prerequise;
 
-    -- Vérification si l'ajout peut se faire grâce au trigger_verifier_ajout_prerequis_ue
     INSERT INTO project_sql.prerequis
     VALUES (_ue.id_ue, _ue_prerequise.id_ue);
+    -- Vérification si l'ajout peut se faire grâce au trigger_verifier_ajout_prerequis_ue
 END;
 $$ LANGUAGE plpgsql;
-
----------------------------------------------------------------------
 
 /**
   Ajoute un étudiant à la table etudiants
@@ -132,12 +115,9 @@ $$
 BEGIN
     INSERT INTO project_sql.etudiants
     VALUES (DEFAULT, _nom, _prenom, _email, _mot_de_passe, DEFAULT, DEFAULT);
-
     -- Le pae (vide) de l'étudiant est créé grâce au trigger_ajouter_pae
 END;
 $$ LANGUAGE plpgsql;
-
----------------------------------------------------------------------
 
 /**
   Ajoute une UE validé à la table ue_validees
@@ -158,20 +138,12 @@ BEGIN
     WHERE email = _email
     INTO _etudiant;
 
-    -- Les vérifications se font grâce au trigger_augmenter_credits_valides
-
-    -- Pas besoin de vérifier si l'ue est déjà validée car il y a la contrainte d''unicité qui vérifie cela
-    -- La contrainte référentiel aussi vérifie que l'ue est déjà présente dans la DB
     INSERT INTO project_sql.ues_validees
     VALUES (_etudiant.id_etudiant, _ue.id_ue);
-
-    --Le nombre de crédits validés de l'étudiant est augmenté grâce au trigger_augmenter_credits_valides
+    -- Les vérifications se font grâce au trigger_augmenter_credits_valides
+    -- Le nombre de crédits validés de l'étudiant est augmenté grâce au trigger_augmenter_credits_valides
 END;
 $$ LANGUAGE plpgsql;
-
----------------------------------------------------------------------
-------------------APPLICATION-CENTRALE-ETUDIANT----------------------
----------------------------------------------------------------------
 
 /**
   Ajoute une ue au pae de l'étudiant
@@ -182,7 +154,6 @@ DECLARE
     _pae RECORD;
     _ue  RECORD;
 BEGIN
-
     SELECT p.code_pae
     FROM project_sql.paes p,
          project_sql.etudiants e
@@ -200,8 +171,6 @@ BEGIN
     --L'augmentation du nombre de crédits total du pae se fait grâce au trigger_augmenter_nombre_de_credits_pae
 END;
 $$ LANGUAGE plpgsql;
-
----------------------------------------------------------------------
 
 /**
   Enlève une UE au PAE de l'étudiant
@@ -223,7 +192,6 @@ BEGIN
     FROM project_sql.ues
     WHERE code_ue = _code_ue
     INTO _ue;
-
     --Cette vérification ne fonctionne pas dans le trigger
     IF _ue.id_ue NOT IN (SELECT id_ue
                          FROM project_sql.ues_pae
@@ -235,12 +203,9 @@ BEGIN
     FROM project_sql.ues_pae
     WHERE code_pae = _pae.code_pae
       AND id_ue = _ue.id_ue;
-
     -- La diminution du nombre de crédits total du pae se fait grâce au trigger_diminuer_nombre_de_credits_pae
 END;
 $$ LANGUAGE plpgsql;
-
----------------------------------------------------------------------
 
 /**
   Valide le PAE de l'étudiant
@@ -250,7 +215,6 @@ $$
 DECLARE
     _pae RECORD;
 BEGIN
-
     SELECT code_pae
     FROM project_sql.etudiants e,
          project_sql.paes p
@@ -261,13 +225,10 @@ BEGIN
     UPDATE project_sql.paes
     SET valide = TRUE
     WHERE code_pae = _pae.code_pae;
-
     -- Le bloc de l'étudiant est déterminé grâce au trigger_determiner_bloc_etudiant
     -- Le nombre d'inscrit est augmenté de 1 pour chaque ue grâce au trigger_augmenter_nombre_etudiants_inscrits
 END;
 $$ LANGUAGE plpgsql;
-
----------------------------------------------------------------------
 
 /**
   Réinitialise le PAE de l'étudiant
@@ -284,16 +245,13 @@ BEGIN
       AND e.email = _email
     INTO _pae;
 
-    -- Les vérifications se font grâce au trigger_verifier_pae_reinitialisation
-
     -- Supprime toutes les ues du pae de l'étudiant
     DELETE
     FROM project_sql.ues_pae
     WHERE code_pae = _pae.code_pae;
+    -- Les vérifications se font grâce au trigger_verifier_pae_reinitialisation
 END;
 $$ LANGUAGE plpgsql;
-
----------------------------------------------------------------------
 
 /**
   Connexion d'un étudiant
@@ -303,11 +261,9 @@ $$
 DECLARE
     _etudiant RECORD;
 BEGIN
-
     IF NOT EXISTS(SELECT id_etudiant
                   FROM project_sql.etudiants
-                  WHERE email = _email
-        ) THEN
+                  WHERE email = _email) THEN
         RAISE 'L''étudiant n''existe pas' ;
     END IF;
 
@@ -327,8 +283,11 @@ BEGIN
         WHERE e.email = _email;
 END;
 $$ LANGUAGE plpgsql;
----------------------------------------------------------------------
 
+/**
+  Vérifie que les ues prérequises ont été vzalidé,
+  renvoie true si c'est le cas, false sinon.
+ */
 CREATE OR REPLACE FUNCTION project_sql.a_valider_les_ues_prerequises(_id_ue INT, _id_etudiant INT) RETURNS BOOLEAN AS
 $$
 DECLARE
@@ -344,30 +303,22 @@ BEGIN
                 RETURN FALSE;
             END IF;
         END LOOP;
-
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;
-
 ---------------------------------------------------------------------------
-----------------------PROCEDURES-WITH-TRIGGER------------------------------
+-----------------------PROCEDURES-WITH-TRIGGERS----------------------------
 ---------------------------------------------------------------------------
-
 /**
   Ajoute un pae à l'étudiant qui vient d'être créé.
-  Il n'est pas nécéssaire de vérifier si l'étudiant a déjà un PAE car cette fonction est
-  appelée après avoir fait un INSERT pour créer un nouvel étudiant dont l'id est défini en DEFAULT
-  (dans notre DB, cet ID est autoincrémenté et ne sera donc jamais le même).
  */
 CREATE OR REPLACE FUNCTION project_sql.ajouter_pae() RETURNS TRIGGER AS
 $$
 DECLARE
     _id_etudiant INT := NEW.id_etudiant;
 BEGIN
-
     INSERT INTO project_sql.paes (id_etudiant)
     VALUES (_id_etudiant);
-
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -377,8 +328,6 @@ CREATE TRIGGER trigger_ajouter_pae
     ON project_sql.etudiants
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.ajouter_pae();
-
----------------------------------------------------------------------
 
 /**
   Vérifie que l'ue prerequise peut être ajoutée.
@@ -406,7 +355,6 @@ BEGIN
     IF _ue_prerequise.bloc = _ue.bloc THEN
         RAISE 'Le bloc du prérequis est égal au bloc de cette ue.';
     END IF;
-
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -416,8 +364,6 @@ CREATE TRIGGER trigger_verifier_ajout_prerequis_ue
     ON project_sql.prerequis
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.verifier_ajout_prerequis_ue();
-
----------------------------------------------------------------------
 
 /**
   Augmente le nombre de crédits total d'un pae après q'une ue à été ajouté à celui-ci.
@@ -429,7 +375,6 @@ DECLARE
     _ue              RECORD;
     _ue_prerequise   RECORD;
 BEGIN
-    -- todo CHECK IF OLD OR NEW
     SELECT p.id_etudiant, p.valide, e.nombre_de_credits_valides
     FROM project_sql.paes p,
          project_sql.etudiants e
@@ -466,21 +411,19 @@ BEGIN
     -- sans son prérequis.
     FOR _ue_prerequise IN (SELECT id_ue_prerequise
                            FROM project_sql.prerequis
-                           WHERE id_ue = _ue.id_ue)
-        LOOP
+                           WHERE id_ue = _ue.id_ue) LOOP
             IF (SELECT COUNT(*)
                 FROM project_sql.ues_validees
                 WHERE id_ue = _ue_prerequise.id_ue_prerequise
                   AND id_etudiant = _etudiant_et_pae.id_etudiant) = 0 THEN
                 RAISE 'L''étudiant n''a pas validé une ue prérequise.';
             END IF;
-        END LOOP;
+    END LOOP;
 
     --Augmente le nombre de credit
     UPDATE project_sql.paes
     SET nombre_de_credits_total = nombre_de_credits_total + _ue.nombre_de_credits
     WHERE code_pae = NEW.code_pae;
-
     RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
@@ -491,8 +434,9 @@ CREATE TRIGGER trigger_augmenter_nombre_de_credits_pae
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.augmenter_nombre_de_credits_pae();
 
----------------------------------------------------------------------
-
+/**
+  Diminue le nombre de credits du pae lors de la suppression d'une ue dans le pae
+ */
 CREATE OR REPLACE FUNCTION project_sql.diminuer_nombre_de_credits_pae() RETURNS TRIGGER AS
 $$
 DECLARE
@@ -519,7 +463,6 @@ BEGIN
     UPDATE project_sql.paes
     SET nombre_de_credits_total = nombre_de_credits_total - _ue.nombre_de_credits
     WHERE code_pae = OLD.code_pae;
-
     RETURN OLD;
 END
 $$ LANGUAGE plpgsql;
@@ -529,9 +472,6 @@ CREATE TRIGGER trigger_diminuer_nombre_de_credits_pae
     ON project_sql.ues_pae
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.diminuer_nombre_de_credits_pae();
-
-
----------------------------------------------------------------------
 
 /**
   Augmente le nombre d'étudiants inscrits
@@ -543,13 +483,11 @@ DECLARE
 BEGIN
     FOR _ue IN (SELECT id_ue
                 FROM project_sql.ues_pae
-                WHERE code_pae = NEW.code_pae)
-        LOOP
+                WHERE code_pae = NEW.code_pae) LOOP
             UPDATE project_sql.ues
             SET nombre_d_inscrits = nombre_d_inscrits + 1
             WHERE id_ue = _ue.id_ue;
-        END LOOP;
-
+    END LOOP;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -561,8 +499,6 @@ CREATE TRIGGER trigger_augmenter_nombre_etudiants_inscrits
     ON project_sql.paes
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.augmenter_nombre_etudiants_inscrits();
-
----------------------------------------------------------------------
 
 /**
   Augmente le nombre de crédits validés dans la table étudiant après qu'une ue a été validée.
@@ -610,7 +546,6 @@ BEGIN
     UPDATE project_sql.etudiants
     SET nombre_de_credits_valides = nombre_de_credits_valides + _ue.nombre_de_credits
     WHERE id_etudiant = NEW.id_etudiant;
-
     RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
@@ -620,8 +555,6 @@ CREATE TRIGGER trigger_augmenter_credits_valides
     ON project_sql.ues_validees
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.augmenter_credits_valides();
-
----------------------------------------------------------------------
 
 /**
   Détermine le bloc de l'étudiant après qu'il ait validé son PAE
@@ -661,7 +594,6 @@ BEGIN
         SET bloc = 2
         WHERE id_etudiant = _etudiant_et_pae.id_etudiant;
     END IF;
-
     -- La vérification des crédits dans le pae se fait grâce au trigger_verifier_bloc_validation
     RETURN NEW;
 END;
@@ -675,8 +607,6 @@ CREATE TRIGGER trigger_determiner_bloc_etudiant
     ON project_sql.paes
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.determiner_bloc_etudiant();
-
----------------------------------------------------------------------
 
 /**
   Vérifie que les crédits du pae de l'étudiant sont suffisant
@@ -725,7 +655,6 @@ BEGIN
         _etudiant_et_pae.nombre_de_credits_total > 74) THEN
         RAISE 'Impossible de valider le pae, il doit y avoir au maximum 74 crédits.';
     END IF;
-
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -736,8 +665,6 @@ CREATE TRIGGER trigger_verifier_bloc_validation
     ON project_sql.etudiants
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.verifier_bloc_validation();
-
----------------------------------------------------------------------
 
 /**
   Vérifie que le pae peut être réinitialisé
@@ -755,7 +682,6 @@ BEGIN
     IF _pae.valide IS TRUE THEN
         RAISE 'Le pae ne peut pas être réinitialisé car il est déjà validé.';
     END IF;
-
     RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
@@ -765,7 +691,6 @@ CREATE TRIGGER trigger_verifier_pae_reinitialisation
     ON project_sql.ues_pae
     FOR EACH ROW
 EXECUTE PROCEDURE project_sql.verifier_pae_reinitialisation();
-
 ---------------------------------------------------------------------------
 -------------------------------VIEWS---------------------------------------
 ---------------------------------------------------------------------------
@@ -778,8 +703,6 @@ SELECT DISTINCT nom                       AS "nom",
                 nombre_de_credits_valides AS "nombre_de_credits_valides",
                 bloc                      AS "bloc"
 FROM project_sql.etudiants;
-
----------------------------------------------------------------------
 
 /**
   Visualise les ues qui sont dans le pae de l'étudiant
@@ -799,8 +722,6 @@ WHERE pae.id_etudiant = e.id_etudiant
   AND ue.id_ue = ue_pae.id_ue
 ORDER BY ue.code_ue;
 
----------------------------------------------------------------------
-
 /**
   Visualise les étudiants qui n'ont pas encore validés leur pae
  */
@@ -812,8 +733,6 @@ FROM project_sql.etudiants e,
      project_sql.paes p
 WHERE e.id_etudiant = p.id_etudiant
   AND p.valide IS FALSE;
-
----------------------------------------------------------------------
 
 /**
   Visualise les ues que l'étudiant peut ajouter à son pae
@@ -840,8 +759,6 @@ WHERE p.id_etudiant = e.id_etudiant
   AND ((e.nombre_de_credits_valides >= 30 AND project_sql.a_valider_les_ues_prerequises(ue.id_ue, e.id_etudiant))
     OR (e.nombre_de_credits_valides < 30 AND ue.bloc = 1));
 
----------------------------------------------------------------------
-
 /**
   Visualise les ue par bloc
  */
@@ -852,8 +769,6 @@ SELECT code_ue           AS "code_ue",
        bloc              AS "bloc"
 FROM project_sql.ues
 ORDER BY nombre_d_inscrits;
-
----------------------------------------------------------------------
 
 /**
   Visualise tous les étudiants
@@ -867,20 +782,14 @@ FROM project_sql.etudiants e,
      project_sql.paes p
 WHERE e.id_etudiant = p.id_etudiant
 ORDER BY p.nombre_de_credits_total;
-
 ---------------------------------------------------------------------------
 -------------------------------GRANTS--------------------------------------
 ---------------------------------------------------------------------------
-
 GRANT CONNECT ON DATABASE
     dbantoinepirlot TO nicolasdimitriadis;
 
----------------------------------------------------------------------
-
 GRANT USAGE ON SCHEMA
     project_sql TO nicolasdimitriadis;
-
----------------------------------------------------------------------
 
 GRANT SELECT ON TABLE
     project_sql.etudiants,
@@ -892,19 +801,13 @@ GRANT SELECT ON TABLE
     project_sql.visualiser_pae,
     project_sql.visualiser_ue_disponible_pae TO nicolasdimitriadis;
 
----------------------------------------------------------------------
-
 GRANT INSERT ON TABLE
     project_sql.ues_pae TO nicolasdimitriadis;
-
----------------------------------------------------------------------
 
 GRANT UPDATE ON TABLE
     project_sql.ues,
     project_sql.paes,
     project_sql.etudiants TO nicolasdimitriadis;
-
----------------------------------------------------------------------
 
 GRANT DELETE ON TABLE
     project_sql.ues_pae TO nicolasdimitriadis;
