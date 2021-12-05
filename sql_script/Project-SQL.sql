@@ -297,11 +297,9 @@ $$ LANGUAGE plpgsql;
  */
 CREATE OR REPLACE FUNCTION project_sql.ajouter_pae() RETURNS TRIGGER AS
 $$
-DECLARE
-    _id_etudiant INT := NEW.id_etudiant;
 BEGIN
     INSERT INTO project_sql.paes (id_etudiant)
-    VALUES (_id_etudiant);
+    VALUES (NEW.id_etudiant);
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
