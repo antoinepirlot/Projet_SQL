@@ -497,11 +497,10 @@ BEGIN
 
     -- Si il y a une ue prérequise et qu'elle n'est pas validée, alors on ne peut pas valider cette ue.
     IF _record.nombre_de_prerequis <> 0
-        AND (SELECT COUNT(*)
-             FROM project_sql.ues_validees
-             WHERE id_ue = _record.id_ue_prerequise
-               AND id_etudiant = NEW.id_etudiant) = 0 THEN
-
+        AND NOT EXISTS (SELECT COUNT(id_ue)
+                        FROM project_sql.ues_validees
+                        WHERE id_ue = _record.id_ue_prerequise
+                          AND id_etudiant = NEW.id_etudiant) THEN
         RAISE 'L''étudiant n''a pas validé le prérequis de ce cours.';
     END IF;
 
