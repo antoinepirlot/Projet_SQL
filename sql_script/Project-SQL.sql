@@ -203,7 +203,7 @@ $$
 DECLARE
     _pae RECORD;
 BEGIN
-    SELECT code_pae
+    SELECT p.code_pae
     FROM project_sql.etudiants e,
          project_sql.paes p
     WHERE e.id_etudiant = p.id_etudiant
@@ -384,9 +384,9 @@ BEGIN
                            FROM project_sql.prerequis
                            WHERE id_ue = _record.id_ue) LOOP
             IF NOT EXISTS (SELECT id_ue
-                FROM project_sql.ues_validees
-                WHERE id_ue = _ue.id_ue_prerequise
-                  AND id_etudiant = _record.id_etudiant) THEN
+                           FROM project_sql.ues_validees
+                           WHERE id_ue = _ue.id_ue_prerequise
+                             AND id_etudiant = _record.id_etudiant) THEN
                 RAISE 'L''étudiant n''a pas validé une ue prérequise.';
             END IF;
     END LOOP;
@@ -601,14 +601,12 @@ BEGIN
         RAISE 'Ton pae ne peut pas avoir plus de 60 crédits car tu as validés moins de 45 crédits.';
     END IF;
     -- Si l'étudiant est en bloc 2, le nombre de crédit du PAE devra être entre 55 et 74 crédits
-    IF (_record.credits_pae < 55 OR _record.credits_pae > 74)
-        AND _record.bloc = 2 THEN
+    IF (_record.credits_pae < 55 OR _record.credits_pae > 74) AND _record.bloc = 2 THEN
         RAISE 'Impossible de valider le pae, tu dois avoir entre 55 et 74 crédits dans ton pae.';
     END IF;
     -- Si la somme des crédits précédemment validés et ceux du PAE atteignent 180, le PAE
     -- ne peut pas dépasser 74 crédits
-    IF (_record.credits_valides + _record.credits_pae = 180 AND
-        _record.credits_pae > 74) THEN
+    IF (_record.credits_valides + _record.credits_pae = 180 AND _record.credits_pae > 74) THEN
         RAISE 'Impossible de valider le pae, il doit y avoir au maximum 74 crédits.';
     END IF;
     RETURN NEW;
@@ -664,19 +662,19 @@ FROM project_sql.etudiants;
   Visualise les ues qui sont dans le pae de l'étudiant
  */
 CREATE OR REPLACE VIEW project_sql.visualiser_pae as
-SELECT DISTINCT ue.code_ue,
-                ue.nom,
-                ue.nombre_de_credits,
-                ue.bloc,
-                e.email AS "email"
-FROM project_sql.ues ue,
+SELECT u.code_ue,
+       u.nom,
+       u.nombre_de_credits,
+       u.bloc,
+       e.email AS "email"
+FROM project_sql.ues u,
      project_sql.etudiants e,
-     project_sql.paes pae,
-     project_sql.ues_pae ue_pae
-WHERE pae.id_etudiant = e.id_etudiant
-  AND ue_pae.code_pae = pae.code_pae
-  AND ue.id_ue = ue_pae.id_ue
-ORDER BY ue.code_ue;
+     project_sql.paes p,
+     project_sql.ues_pae up
+WHERE p.id_etudiant = e.id_etudiant
+  AND up.code_pae = p.code_pae
+  AND u.id_ue = up.id_ue
+ORDER BY u.code_ue;
 
 /**
   Visualise les étudiants qui n'ont pas encore validés leur pae
