@@ -169,31 +169,29 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION project_sql.enlever_ue_pae(_email VARCHAR(150), _code_ue VARCHAR(15)) RETURNS VOID AS
 $$
 DECLARE
-    _ue  RECORD;
-    _pae RECORD;
+    _record RECORD;
 BEGIN
-    SELECT code_pae
+    SELECT p.code_pae,
+           u.id_ue
     FROM project_sql.etudiants e,
-         project_sql.paes p
+         project_sql.paes p,
+         project_sql.ues u
     WHERE e.id_etudiant = p.id_etudiant
       AND e.email = _email
-    INTO _pae;
+      AND u.code_ue = _code_ue
+    INTO _record;
 
-    SELECT id_ue
-    FROM project_sql.ues
-    WHERE code_ue = _code_ue
-    INTO _ue;
     --Cette vérification ne fonctionne pas dans le trigger
-    IF _ue.id_ue NOT IN (SELECT id_ue
+    IF _record.id_ue NOT IN (SELECT id_ue
                          FROM project_sql.ues_pae
-                         WHERE code_pae = _pae.code_pae) THEN
+                         WHERE code_pae = _record.code_pae) THEN
         RAISE 'L''ue n''est pas présente dans le pae.';
     END IF;
 
     DELETE
     FROM project_sql.ues_pae
-    WHERE code_pae = _pae.code_pae
-      AND id_ue = _ue.id_ue;
+    WHERE code_pae = _record.code_pae
+      AND id_ue = _record.id_ue;
     -- La diminution du nombre de crédits total du pae se fait grâce au trigger_diminuer_nombre_de_credits_pae
 END;
 $$ LANGUAGE plpgsql;
