@@ -88,20 +88,17 @@ CREATE OR REPLACE FUNCTION project_sql.ajouter_prerequis_ue(_code_ue VARCHAR(15)
 $$
 DECLARE
     _ue            RECORD;
-    _ue_prerequise RECORD;
 BEGIN
-    SELECT id_ue
-    FROM project_sql.ues
-    WHERE code_ue = _code_ue
+    SELECT u1.id_ue AS "id_ue",
+           u2.id_ue AS "id_ue_prerequise"
+    FROM project_sql.ues u1,
+         project_sql.ues u2
+    WHERE u1.code_ue = _code_ue
+      AND u2.code_ue = _code_ue_prerequise
     INTO _ue;
 
-    SELECT id_ue
-    FROM project_sql.ues
-    WHERE code_ue = _code_ue_prerequise
-    INTO _ue_prerequise;
-
     INSERT INTO project_sql.prerequis
-    VALUES (_ue.id_ue, _ue_prerequise.id_ue);
+    VALUES (_ue.id_ue, _ue.id_ue_prerequise);
     -- Vérification si l'ajout peut se faire grâce au trigger_verifier_ajout_prerequis_ue
 END;
 $$ LANGUAGE plpgsql;
