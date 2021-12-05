@@ -274,15 +274,15 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION project_sql.a_valider_les_ues_prerequises(_id_ue INT, _id_etudiant INT) RETURNS BOOLEAN AS
 $$
 DECLARE
-    _ue_prerequise RECORD;
+    _ue RECORD;
 BEGIN
-    FOR _ue_prerequise IN (SELECT id_ue_prerequise
-                           FROM project_sql.prerequis
-                           WHERE id_ue = _id_ue)
+    FOR _ue IN (SELECT id_ue_prerequise
+                FROM project_sql.prerequis
+                WHERE id_ue = _id_ue)
         LOOP
-            IF _ue_prerequise.id_ue_prerequise NOT IN (SELECT id_ue
-                                                       FROM project_sql.ues_validees
-                                                       WHERE id_etudiant = _id_etudiant) THEN
+            IF _ue.id_ue_prerequise NOT IN (SELECT id_ue
+                                            FROM project_sql.ues_validees
+                                            WHERE id_etudiant = _id_etudiant) THEN
                 RETURN FALSE;
             END IF;
         END LOOP;
