@@ -429,7 +429,6 @@ BEGIN
     FROM project_sql.ues ue
     WHERE id_ue = OLD.id_ue
     INTO _ue;
-
     --Diminue le nombre de crédits dans le pae
     UPDATE project_sql.paes
     SET nombre_de_credits_total = nombre_de_credits_total - _ue.nombre_de_credits
