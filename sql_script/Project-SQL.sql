@@ -395,7 +395,7 @@ BEGIN
     SET nombre_de_credits_total = nombre_de_credits_total + _record.credits_ue
     WHERE code_pae = NEW.code_pae;
     RETURN NEW;
-END
+END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_augmenter_nombre_de_credits_pae
@@ -433,7 +433,7 @@ BEGIN
     SET nombre_de_credits_total = nombre_de_credits_total - _ue.nombre_de_credits
     WHERE code_pae = OLD.code_pae;
     RETURN OLD;
-END
+END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_diminuer_nombre_de_credits_pae
@@ -509,7 +509,7 @@ BEGIN
     SET nombre_de_credits_valides = etudiants.nombre_de_credits_valides + _record.credits_ue
     WHERE id_etudiant = NEW.id_etudiant;
     RETURN NEW;
-END
+END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_augmenter_credits_valides
