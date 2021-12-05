@@ -391,7 +391,6 @@ BEGIN
                 RAISE 'L''étudiant n''a pas validé une ue prérequise.';
             END IF;
     END LOOP;
-
     --Augmente le nombre de credit
     UPDATE project_sql.paes
     SET nombre_de_credits_total = nombre_de_credits_total + _record.credits_ue
