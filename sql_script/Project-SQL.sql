@@ -654,24 +654,24 @@ EXECUTE PROCEDURE project_sql.verifier_pae_reinitialisation();
 -------------------------------VIEWS---------------------------------------
 ---------------------------------------------------------------------------
 /**
-  Visualise les étudiants avec le bloc
+  Visualise les étudiants avec du bloc choisi
  */
 CREATE OR REPLACE VIEW project_sql.visualiser_tous_les_etudiants_bloc AS
-SELECT DISTINCT nom                       AS "nom",
-                prenom                    AS "prenom",
-                nombre_de_credits_valides AS "nombre_de_credits_valides",
-                bloc                      AS "bloc"
+SELECT DISTINCT nom,
+                prenom,
+                nombre_de_credits_valides,
+                bloc AS "bloc"
 FROM project_sql.etudiants;
 
 /**
   Visualise les ues qui sont dans le pae de l'étudiant
  */
 CREATE OR REPLACE VIEW project_sql.visualiser_pae as
-SELECT DISTINCT ue.code_ue           AS "code_ue",
-                ue.nom               AS "nom",
-                ue.nombre_de_credits AS "nombre_de_credits",
-                ue.bloc              AS "bloc",
-                e.email              AS "email"
+SELECT DISTINCT ue.code_ue,
+                ue.nom,
+                ue.nombre_de_credits,
+                ue.bloc,
+                e.email AS "email"
 FROM project_sql.ues ue,
      project_sql.etudiants e,
      project_sql.paes pae,
@@ -685,9 +685,9 @@ ORDER BY ue.code_ue;
   Visualise les étudiants qui n'ont pas encore validés leur pae
  */
 CREATE OR REPLACE VIEW project_sql.visualiser_etudiant_pae_non_valide AS
-SELECT DISTINCT e.nom                       AS "nom",
-                e.prenom                    AS "prenom",
-                e.nombre_de_credits_valides AS "Nombre de credits valide"
+SELECT DISTINCT e.nom,
+                e.prenom,
+                e.nombre_de_credits_valides
 FROM project_sql.etudiants e,
      project_sql.paes p
 WHERE e.id_etudiant = p.id_etudiant
@@ -697,11 +697,11 @@ WHERE e.id_etudiant = p.id_etudiant
   Visualise les ues que l'étudiant peut ajouter à son pae
  */
 CREATE OR REPLACE VIEW project_sql.visualiser_ue_disponible_pae AS
-SELECT ue.code_ue           AS "code_ue",
-       ue.nom               AS "nom",
-       ue.nombre_de_credits AS "nombre_de_credits",
-       ue.bloc              AS "bloc",
-       e.email              AS "email"
+SELECT ue.code_ue,
+       ue.nom,
+       ue.nombre_de_credits,
+       ue.bloc,
+       e.email AS "email"
 FROM project_sql.etudiants e,
      project_sql.paes p,
      project_sql.ues ue
@@ -722,10 +722,10 @@ WHERE p.id_etudiant = e.id_etudiant
   Visualise les ue par bloc
  */
 CREATE OR REPLACE VIEW project_sql.visualier_ue_bloc AS
-SELECT code_ue           AS "code_ue",
-       nom               AS "nom",
-       nombre_d_inscrits AS "nombre_inscrits",
-       bloc              AS "bloc"
+SELECT code_ue,
+       nom,
+       nombre_d_inscrits,
+       bloc AS "bloc"
 FROM project_sql.ues
 ORDER BY nombre_d_inscrits;
 
@@ -733,10 +733,10 @@ ORDER BY nombre_d_inscrits;
   Visualise tous les étudiants
  */
 CREATE OR REPLACE VIEW project_sql.visualiser_tous_les_etudiants AS
-SELECT DISTINCT e.nom                     AS "nom",
-                e.prenom                  AS "prenom",
+SELECT DISTINCT e.nom,
+                e.prenom,
                 e.bloc,
-                p.nombre_de_credits_total AS "nombre_de_credits_pae"
+                p.nombre_de_credits_total
 FROM project_sql.etudiants e,
      project_sql.paes p
 WHERE e.id_etudiant = p.id_etudiant
