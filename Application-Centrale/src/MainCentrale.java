@@ -209,9 +209,9 @@ public class MainCentrale {
                 boolean uePresentes = false;
                 System.out.println("------------------UES-DU-BLOC-"+bloc+"-------------------");
                 while (rs.next()) {
-                    System.out.println("Code de l'ue: " + rs.getString(1) + " | Nom de l'ue: " + rs.getString(2) +
-                            " | Nombre d'inscrits: " + rs.getString(3));
-                    System.out.println("");
+                    System.out.print("Code de l'ue: " + rs.getString(1) + " | ");
+                    System.out.print("Nom de l'ue: " + rs.getString(2) + " | " );
+                    System.out.println("Nombre d'inscrits: " + rs.getString(3));
                     uePresentes = true;
                 }
                 System.out.println("----------------------------------------");
