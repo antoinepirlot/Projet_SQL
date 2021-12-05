@@ -210,7 +210,7 @@ public class MainCentrale {
                 System.out.println("------------------UES-DU-BLOC-"+bloc+"-------------------");
                 while (rs.next()) {
                     System.out.print("Code de l'ue: " + rs.getString(1) + " | ");
-                    System.out.print("Nom de l'ue: " + rs.getString(2) + " | " );
+                    System.out.print("Nom de l'ue: " + rs.getString(2) + " | ");
                     System.out.println("Nombre d'inscrits: " + rs.getString(3));
                     uePresentes = true;
                 }
