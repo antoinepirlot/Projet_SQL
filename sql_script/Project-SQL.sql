@@ -476,29 +476,27 @@ CREATE OR REPLACE FUNCTION project_sql.augmenter_credits_valides() RETURNS TRIGG
 $$
 DECLARE
     _record RECORD;
+    _ue_prerequise RECORD;
 BEGIN
     SELECT u.id_ue,
            u.nombre_de_credits AS "credits_ue",
            u.bloc AS "bloc_ue",
-           e.nombre_de_credits_valides AS "credits_valides",
-           p.id_ue_prerequise,
-           COUNT(p.id_ue_prerequise) AS "nombre_de_prerequis"
+           e.nombre_de_credits_valides AS "credits_valides"
     FROM project_sql.ues u,
-         project_sql.prerequis p,
          project_sql.etudiants e
-    WHERE u.id_ue = p.id_ue
-      AND u.id_ue = NEW.id_ue
+    WHERE u.id_ue = NEW.id_ue
       AND e.id_etudiant = NEW.id_etudiant
-    GROUP BY u.id_ue,
-             e.nombre_de_credits_valides,
-             p.id_ue_prerequise
     INTO _record;
 
+    SELECT id_ue_prerequise
+    FROM project_sql.prerequis
+    WHERE id_ue = NEW.id_ue
+    INTO _ue_prerequise;
     -- Si il y a une ue prérequise et qu'elle n'est pas validée, alors on ne peut pas valider cette ue.
-    IF _record.nombre_de_prerequis <> 0
-        AND NOT EXISTS (SELECT COUNT(id_ue)
+    IF _ue_prerequise IS NOT NULL
+        AND NOT EXISTS (SELECT id_ue
                         FROM project_sql.ues_validees
-                        WHERE id_ue = _record.id_ue_prerequise
+                        WHERE id_ue = _ue_prerequise.id_ue_prerequise
                           AND id_etudiant = NEW.id_etudiant) THEN
         RAISE 'L''étudiant n''a pas validé le prérequis de ce cours.';
     END IF;
@@ -508,7 +506,7 @@ BEGIN
     END IF;
 
     UPDATE project_sql.etudiants
-    SET nombre_de_credits_valides = nombre_de_credits_valides + _record.credits_ue
+    SET nombre_de_credits_valides = etudiants.nombre_de_credits_valides + _record.credits_ue
     WHERE id_etudiant = NEW.id_etudiant;
     RETURN NEW;
 END
