@@ -134,7 +134,6 @@ BEGIN
 
     INSERT INTO project_sql.ues_validees
     VALUES (_record.id_etudiant, _record.id_ue);
-    -- Les vérifications se font grâce au trigger_augmenter_credits_valides
     -- Le nombre de crédits validés de l'étudiant est augmenté grâce au trigger_augmenter_credits_valides
 END;
 $$ LANGUAGE plpgsql;
