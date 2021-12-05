@@ -349,58 +349,59 @@ EXECUTE PROCEDURE project_sql.verifier_ajout_prerequis_ue();
 CREATE OR REPLACE FUNCTION project_sql.augmenter_nombre_de_credits_pae() RETURNS TRIGGER AS
 $$
 DECLARE
-    _etudiant_et_pae RECORD;
-    _ue              RECORD;
-    _ue_prerequise   RECORD;
+    _record RECORD;
+    _ue   RECORD;
 BEGIN
-    SELECT p.id_etudiant, p.valide, e.nombre_de_credits_valides
+    SELECT p.id_etudiant,
+           p.valide,
+           e.nombre_de_credits_valides,
+           u.id_ue,
+           u.bloc,
+           u.nombre_de_credits AS "credits_ue"
     FROM project_sql.paes p,
-         project_sql.etudiants e
+         project_sql.etudiants e,
+         project_sql.ues u
     WHERE p.id_etudiant = e.id_etudiant
       AND p.code_pae = NEW.code_pae
-    INTO _etudiant_et_pae;
-
-    SELECT id_ue, bloc, nombre_de_credits
-    FROM project_sql.ues
-    WHERE ues.id_ue = NEW.id_ue
-    INTO _ue;
+      AND u.id_ue = NEW.id_ue
+    INTO _record;
 
     -- Si le PAE est déjà validé
-    IF _etudiant_et_pae.valide IS TRUE THEN
+    IF _record.valide IS TRUE THEN
         RAISE 'Ce PAE a déjà été validé, il est impossible d''ajouter une ue.';
     END IF;
 
     -- Si l’étudiant a déjà validé cette UE précédemment
     IF (SELECT COUNT(*)
         FROM project_sql.ues_validees
-        WHERE id_ue = _ue.id_ue
-          AND id_etudiant = _etudiant_et_pae.id_etudiant) <> 0 THEN
+        WHERE id_ue = _record.id_ue
+          AND id_etudiant = _record.id_etudiant) <> 0 THEN
 
         RAISE 'Cette ue a déjà été validée par l''étudiant';
     END IF;
 
     -- Si l’étudiant a validé moins de 45 ects et que l’UE n’est pas du bloc 1
-    IF _etudiant_et_pae.nombre_de_credits_valides < 30 AND _ue.bloc != 1 THEN
+    IF _record.nombre_de_credits_valides < 30 AND _record.bloc != 1 THEN
         RAISE 'L''étudiant a validé moins de 30 crédits et cette ue ne figure pas au bloc 1.';
     END IF;
 
     -- Si l’étudiant n’a pas validé tous les prérequis de cette UE
     -- Avec les vérifications de la fonction encoder_ue_validee, il est impossible que le prérequis ai été validé sans
     -- sans son prérequis.
-    FOR _ue_prerequise IN (SELECT id_ue_prerequise
+    FOR _ue IN (SELECT id_ue_prerequise
                            FROM project_sql.prerequis
-                           WHERE id_ue = _ue.id_ue) LOOP
+                           WHERE id_ue = _record.id_ue) LOOP
             IF (SELECT COUNT(*)
                 FROM project_sql.ues_validees
-                WHERE id_ue = _ue_prerequise.id_ue_prerequise
-                  AND id_etudiant = _etudiant_et_pae.id_etudiant) = 0 THEN
+                WHERE id_ue = _ue.id_ue_prerequise
+                  AND id_etudiant = _record.id_etudiant) = 0 THEN
                 RAISE 'L''étudiant n''a pas validé une ue prérequise.';
             END IF;
     END LOOP;
 
     --Augmente le nombre de credit
     UPDATE project_sql.paes
-    SET nombre_de_credits_total = nombre_de_credits_total + _ue.nombre_de_credits
+    SET nombre_de_credits_total = nombre_de_credits_total + _record.credits_ue
     WHERE code_pae = NEW.code_pae;
     RETURN NEW;
 END
