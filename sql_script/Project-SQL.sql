@@ -122,21 +122,18 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION project_sql.encoder_ue_validee(_email VARCHAR(150), _code_ue VARCHAR(15)) RETURNS VOID AS
 $$
 DECLARE
-    _ue       RECORD;
-    _etudiant RECORD;
+    _record RECORD;
 BEGIN
-    SELECT id_ue
-    FROM project_sql.ues
-    WHERE code_ue = _code_ue
-    INTO _ue;
-
-    SELECT id_etudiant
-    FROM project_sql.etudiants
-    WHERE email = _email
-    INTO _etudiant;
+    SELECT u.id_ue,
+           e.id_etudiant
+    FROM project_sql.ues u,
+         project_sql.etudiants e
+    WHERE u.code_ue = _code_ue
+      AND e.email = _email
+    INTO _record;
 
     INSERT INTO project_sql.ues_validees
-    VALUES (_etudiant.id_etudiant, _ue.id_ue);
+    VALUES (_record.id_etudiant, _record.id_ue);
     -- Les vérifications se font grâce au trigger_augmenter_credits_valides
     -- Le nombre de crédits validés de l'étudiant est augmenté grâce au trigger_augmenter_credits_valides
 END;
