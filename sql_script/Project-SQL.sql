@@ -69,8 +69,6 @@ CREATE TABLE project_sql.ues_pae
 ---------------------------------------------------------------------------
 /**
   Ajoute une ue dans la table ues
-  On ne sait pas pourquoi mais il faut relancer le script une deuxième fois à cause du bug:
-  unterminated dollar-quoted string at or near "$$[...]" POSITION: 184
  */
 CREATE OR REPLACE FUNCTION project_sql.ajouter_ue(_code_ue VARCHAR(15), _nom VARCHAR(150), _bloc INT,
                                                   _nombre_de_credits INT) RETURNS VOID AS
