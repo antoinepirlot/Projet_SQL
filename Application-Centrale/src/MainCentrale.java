@@ -20,7 +20,7 @@ public class MainCentrale {
         System.out.println("3 -> Ajouter un étudiant.");
         System.out.println("4 -> Encoder une ue validée pour un étudiant.");
         System.out.println("5 -> Visualiser tous les étudiants d'un bloc particulier.");
-        System.out.println("6 -> Visualiser tous les étudiants.");
+        System.out.println("6 -> Visualiser tous les étudiants et leur nombre de crédits dans le pae.");
         System.out.println("7 -> Visualiser tous les étudiants qui n'ont pas encore validé leur PAE.");
         System.out.println("8 -> Visualiser les UEs d'un bloc en particulier.");
         System.out.println("Autre -> Quitter l'application.");
@@ -133,10 +133,9 @@ public class MainCentrale {
     }
 
     public void visualiserTousLesEtudiantDUnBloc() {
-        int bloc = -1;
-        while (bloc < 0 || bloc > 3) {
+        int bloc = 0;
+        while (bloc < 1 || bloc > 3) {
             System.out.println("De quel bloc voulez vous voir les étudiant?");
-            System.out.println("0 -> Bloc indéterminé");
             System.out.println("1 -> Bloc 1");
             System.out.println("2 -> Bloc 2");
             System.out.println("3 -> Bloc 3");
@@ -145,12 +144,7 @@ public class MainCentrale {
         }
         String query;
         try {
-            if (bloc == 0)
-                query = """
-                        SELECT nom, prenom, nombre_de_credits_valides FROM project_sql.etudiants WHERE "bloc" IS NULL
-                        """;
-            else
-                query = "SELECT nom, prenom, nombre_de_credits_valides FROM project_sql.etudiants WHERE \"bloc\" =" + bloc + "";
+            query = "SELECT nom, prenom, nombre_de_credits_valides FROM project_sql.etudiants WHERE \"bloc\" =" + bloc + "";
             Statement statement = CONNEXION.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
