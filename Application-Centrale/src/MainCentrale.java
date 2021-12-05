@@ -147,12 +147,16 @@ public class MainCentrale {
             query = "SELECT nom, prenom, nombre_de_credits_valides FROM project_sql.etudiants WHERE \"bloc\" =" + bloc + "";
             Statement statement = CONNEXION.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
+            System.out.println("------------------ETUDIANTS-DU-BLOC-"+bloc+"-------------------");
             while (resultSet.next()) {
                 String nom = resultSet.getString(1);
                 String prenom = resultSet.getString(2);
                 String nombreDeCredits = resultSet.getString(3);
-                System.out.println("Nom: " + nom + ", prénom: " + prenom + ", nombre de crédits validés: " + nombreDeCredits);
+                System.out.print("Nom: " + nom  + " | ");
+                System.out.print("Prénom: " + prenom  + " | ");
+                System.out.println("Nombre de crédits validés: " + nombreDeCredits);
             }
+            System.out.println("--------------------------------------------------------");
         } catch (SQLException e) {
             System.out.println("Problème lors de la demande à la base de données");
             e.printStackTrace();
@@ -165,11 +169,12 @@ public class MainCentrale {
             try (ResultSet rs = ps.executeQuery()) {
                 System.out.println("------------------ETUDIANTS----------------------");
                 while (rs.next()) {
-                    System.out.println("Nom: " + rs.getString(1) + " | Prénom: " + rs.getString(2) +
-                            " | bloc: " + rs.getString(3) + " | Nombre de crédits dans le pae: " + rs.getString(4));
-                    System.out.println("");
+                    System.out.print("Nom: " + rs.getString(1) + " | ");
+                    System.out.print("Prénom: " + rs.getString(2) + " | ");
+                    System.out.print("Bloc: " + rs.getString(3) + " | ");
+                    System.out.println("Nombre de crédits dans le pae: " + rs.getString(4));
                 }
-                System.out.println("--------------------------------------------");
+                System.out.println("-------------------------------------------------");
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -182,12 +187,11 @@ public class MainCentrale {
             try (ResultSet rs = ps.executeQuery()) {
                 System.out.println("-------------ETUDIANTS-(PAE-NON-VALIDE)---------------");
                 while (rs.next()) {
-                    System.out.print("Nom: " + rs.getString(1) + " ");
-                    System.out.print(" | Prénom: " + rs.getString(2) + " ");
-                    System.out.println(" | Nombre de crédits déjà validés: " + rs.getInt(3) + " ");
-                    System.out.println("");
+                    System.out.print("Nom: " + rs.getString(1) + " | ");
+                    System.out.print("Prénom: " + rs.getString(2) + " | ");
+                    System.out.println("Nombre de crédits déjà validés: " + rs.getInt(3));
                 }
-                System.out.println("--------------------------------------------");
+                System.out.println("------------------------------------------------------");
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -203,7 +207,7 @@ public class MainCentrale {
             ps.setInt(1, bloc);
             try (ResultSet rs = ps.executeQuery()) {
                 boolean uePresentes = false;
-                System.out.println("------------------ETUDIANTS-DU-BLOC-"+bloc+"-------------------");
+                System.out.println("------------------UES-DU-BLOC-"+bloc+"-------------------");
                 while (rs.next()) {
                     System.out.println("Code de l'ue: " + rs.getString(1) + " | Nom de l'ue: " + rs.getString(2) +
                             " | Nombre d'inscrits: " + rs.getString(3));
@@ -226,10 +230,11 @@ public class MainCentrale {
             System.out.println("Driver PostgeSQL manquant!");
             System.exit(1);
         }
-        String url = "jdbc:postgresql://localhost:5432/postgres";
+        //String url = "jdbc:postgresql://172.24.2.6:5432/dbantoinepirlot";
+        String url = "jdbc:postgresql://localhost:5432/dbantoinepirlot";
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(url, "postgres", "nikesakou11");
+            connection = DriverManager.getConnection(url, "antoinepirlot", "at5BER69h");
         } catch (SQLException e) {
             System.out.println("Impossible de joindre le server !");
             System.exit(1);
