@@ -476,45 +476,41 @@ EXECUTE PROCEDURE project_sql.augmenter_nombre_etudiants_inscrits();
 CREATE OR REPLACE FUNCTION project_sql.augmenter_credits_valides() RETURNS TRIGGER AS
 $$
 DECLARE
-    _ue            RECORD;
-    _ue_prerequise RECORD;
-    _etudiant      RECORD;
+    _record RECORD;
 BEGIN
-    SELECT id_ue,
-           nombre_de_credits,
-           bloc
-    FROM project_sql.ues
-    WHERE id_ue = NEW.id_ue
-    INTO _ue;
-
-    SELECT id_ue_prerequise,
-           COUNT(*) AS "nombre_de_prerequis"
-    FROM project_sql.prerequis
-    WHERE id_ue = NEW.id_ue
-    GROUP BY id_ue_prerequise
-    INTO _ue_prerequise;
-
-    SELECT nombre_de_credits_valides
-    FROM project_sql.etudiants
-    WHERE id_etudiant = NEW.id_etudiant
-    INTO _etudiant;
+    SELECT u.id_ue,
+           u.nombre_de_credits AS "credits_ue",
+           u.bloc AS "bloc_ue",
+           e.nombre_de_credits_valides AS "credits_valides",
+           p.id_ue_prerequise,
+           COUNT(p.id_ue_prerequise) AS "nombre_de_prerequis"
+    FROM project_sql.ues u,
+         project_sql.prerequis p,
+         project_sql.etudiants e
+    WHERE u.id_ue = p.id_ue
+      AND u.id_ue = NEW.id_ue
+      AND e.id_etudiant = NEW.id_etudiant
+    GROUP BY u.id_ue,
+             e.nombre_de_credits_valides,
+             p.id_ue_prerequise
+    INTO _record;
 
     -- Si il y a une ue prérequise et qu'elle n'est pas validée, alors on ne peut pas valider cette ue.
-    IF _ue_prerequise.nombre_de_prerequis <> 0
+    IF _record.nombre_de_prerequis <> 0
         AND (SELECT COUNT(*)
              FROM project_sql.ues_validees
-             WHERE id_ue = _ue_prerequise.id_ue_prerequise
+             WHERE id_ue = _record.id_ue_prerequise
                AND id_etudiant = NEW.id_etudiant) = 0 THEN
 
         RAISE 'L''étudiant n''a pas validé le prérequis de ce cours.';
     END IF;
 
-    IF _etudiant.nombre_de_credits_valides < 30 AND _ue.bloc <> 1 THEN
+    IF _record.credits_valides < 30 AND _record.bloc_ue <> 1 THEN
         RAISE 'L''étudiant n''a pas validé assez de crédit';
     END IF;
 
     UPDATE project_sql.etudiants
-    SET nombre_de_credits_valides = nombre_de_credits_valides + _ue.nombre_de_credits
+    SET nombre_de_credits_valides = nombre_de_credits_valides + _record.credits_ue
     WHERE id_etudiant = NEW.id_etudiant;
     RETURN NEW;
 END
