@@ -579,45 +579,45 @@ EXECUTE PROCEDURE project_sql.determiner_bloc_etudiant();
 CREATE OR REPLACE FUNCTION project_sql.verifier_bloc_validation() RETURNS TRIGGER AS
 $$
 DECLARE
-    _etudiant_et_pae RECORD;
+    _record RECORD;
 BEGIN
 
-    SELECT p.nombre_de_credits_total,
+    SELECT p.nombre_de_credits_total AS "credits_pae",
            p.valide,
-           e.nombre_de_credits_valides,
+           e.nombre_de_credits_valides AS "credits_valides",
            e.bloc
     FROM project_sql.etudiants e,
          project_sql.paes p
     WHERE e.id_etudiant = p.id_etudiant
       AND e.id_etudiant = NEW.id_etudiant
-    INTO _etudiant_et_pae;
+    INTO _record;
 
     -- Verifie que le pae n'est pas déjà validé
-    IF _etudiant_et_pae.valide IS TRUE THEN
+    IF _record.valide IS TRUE THEN
         RAISE 'PAE déjà validé';
     END IF;
 
     -- Vérifie que l'étudiant n'a pas validé un pae vide
-    IF _etudiant_et_pae.nombre_de_credits_total = 0 THEN
+    IF _record.credits_pae = 0 THEN
         RAISE 'Ton PAE ne peut pas être vide.';
     END IF;
 
     -- Si l’étudiant n’a pas validé au moins 45 crédits dans le passé, alors son PAE ne pourra
     -- pas dépasser 60 crédits
-    IF _etudiant_et_pae.nombre_de_credits_valides < 45 AND _etudiant_et_pae.nombre_de_credits_total > 60 THEN
+    IF _record.credits_valides < 45 AND _record.credits_pae > 60 THEN
         RAISE 'Ton pae ne peut pas avoir plus de 60 crédits car tu as validés moins de 45 crédits.';
     END IF;
 
     -- Si l'étudiant est en bloc 2, le nombre de crédit du PAE devra être entre 55 et 74 crédits
-    IF (_etudiant_et_pae.nombre_de_credits_total < 55 OR _etudiant_et_pae.nombre_de_credits_total > 74)
-        AND _etudiant_et_pae.bloc = 2 THEN
+    IF (_record.credits_pae < 55 OR _record.credits_pae > 74)
+        AND _record.bloc = 2 THEN
         RAISE 'Impossible de valider le pae, tu dois avoir entre 55 et 74 crédits dans ton pae.';
     END IF;
 
     -- Si la somme des crédits précédemment validés et ceux du PAE atteignent 180, le PAE
     -- ne peut pas dépasser 74 crédits
-    IF (_etudiant_et_pae.nombre_de_credits_valides + _etudiant_et_pae.nombre_de_credits_total = 180 AND
-        _etudiant_et_pae.nombre_de_credits_total > 74) THEN
+    IF (_record.credits_valides + _record.credits_pae = 180 AND
+        _record.credits_pae > 74) THEN
         RAISE 'Impossible de valider le pae, il doit y avoir au maximum 74 crédits.';
     END IF;
     RETURN NEW;
