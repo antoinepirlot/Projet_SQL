@@ -730,10 +730,10 @@ ORDER BY nombre_d_inscrits;
   Visualise tous les étudiants
  */
 CREATE OR REPLACE VIEW project_sql.visualiser_tous_les_etudiants AS
-SELECT DISTINCT e.nom,
-                e.prenom,
-                e.bloc,
-                p.nombre_de_credits_total
+SELECT e.nom,
+       e.prenom,
+       e.bloc,
+       p.nombre_de_credits_total
 FROM project_sql.etudiants e,
      project_sql.paes p
 WHERE e.id_etudiant = p.id_etudiant
