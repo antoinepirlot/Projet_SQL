@@ -250,19 +250,13 @@ $$
 DECLARE
     _etudiant RECORD;
 BEGIN
-    IF NOT EXISTS(SELECT id_etudiant
-                  FROM project_sql.etudiants
-                  WHERE email = _email) THEN
-        RAISE 'L''étudiant n''existe pas' ;
-    END IF;
-
-    SELECT id_etudiant, COUNT(*) AS "count"
+    SELECT id_etudiant
     FROM project_sql.etudiants
     WHERE email = _email
     GROUP BY id_etudiant
     INTO _etudiant;
 
-    IF _etudiant.count = 0 THEN
+    IF _etudiant IS NULL THEN
         RAISE 'L''émail ou le mot de passe est incorrect';
     END IF;
 
