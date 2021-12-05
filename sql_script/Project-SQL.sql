@@ -317,23 +317,20 @@ CREATE OR REPLACE FUNCTION project_sql.verifier_ajout_prerequis_ue() RETURNS TRI
 $$
 DECLARE
     _ue            RECORD;
-    _ue_prerequise RECORD;
 BEGIN
-    SELECT bloc
-    FROM project_sql.ues
-    WHERE ues.id_ue = NEW.id_ue
+    SELECT u1.bloc AS "bloc_ue",
+           u2.bloc AS "bloc_ue_prerequise"
+    FROM project_sql.ues u1,
+         project_sql.ues u2
+    WHERE u1.id_ue = NEW.id_ue
+      AND u2.id_ue = NEW.id_ue_prerequise
     INTO _ue;
 
-    SELECT bloc
-    FROM project_sql.ues
-    WHERE id_ue = NEW.id_ue_prerequise
-    INTO _ue_prerequise;
-
-    IF _ue_prerequise.bloc > _ue.bloc THEN
+    IF _ue.bloc_ue_prerequise > _ue.bloc_ue THEN
         RAISE 'Le bloc du prérequis est supérieur au bloc de cette ue.';
     END IF;
 
-    IF _ue_prerequise.bloc = _ue.bloc THEN
+    IF _ue.bloc_ue_prerequise = _ue.bloc_ue THEN
         RAISE 'Le bloc du prérequis est égal au bloc de cette ue.';
     END IF;
     RETURN NEW;
