@@ -365,36 +365,29 @@ BEGIN
       AND p.code_pae = NEW.code_pae
       AND u.id_ue = NEW.id_ue
     INTO _record;
-
     -- Si le PAE est déjà validé
     IF _record.valide IS TRUE THEN
         RAISE 'Ce PAE a déjà été validé, il est impossible d''ajouter une ue.';
     END IF;
-
     -- Si l’étudiant a déjà validé cette UE précédemment
-    IF (SELECT COUNT(*)
-        FROM project_sql.ues_validees
-        WHERE id_ue = _record.id_ue
-          AND id_etudiant = _record.id_etudiant) <> 0 THEN
-
+    IF EXISTS (SELECT id_ue
+               FROM project_sql.ues_validees
+               WHERE id_ue = _record.id_ue
+                 AND id_etudiant = _record.id_etudiant) THEN
         RAISE 'Cette ue a déjà été validée par l''étudiant';
     END IF;
-
     -- Si l’étudiant a validé moins de 45 ects et que l’UE n’est pas du bloc 1
     IF _record.nombre_de_credits_valides < 30 AND _record.bloc != 1 THEN
         RAISE 'L''étudiant a validé moins de 30 crédits et cette ue ne figure pas au bloc 1.';
     END IF;
-
     -- Si l’étudiant n’a pas validé tous les prérequis de cette UE
-    -- Avec les vérifications de la fonction encoder_ue_validee, il est impossible que le prérequis ai été validé sans
-    -- sans son prérequis.
     FOR _ue IN (SELECT id_ue_prerequise
                            FROM project_sql.prerequis
                            WHERE id_ue = _record.id_ue) LOOP
-            IF (SELECT COUNT(*)
+            IF NOT EXISTS (SELECT id_ue
                 FROM project_sql.ues_validees
                 WHERE id_ue = _ue.id_ue_prerequise
-                  AND id_etudiant = _record.id_etudiant) = 0 THEN
+                  AND id_etudiant = _record.id_etudiant) THEN
                 RAISE 'L''étudiant n''a pas validé une ue prérequise.';
             END IF;
     END LOOP;
